@@ -80,6 +80,7 @@ static const char *TeamInfoOptions[] =
 	"LoserPic",
 	"WinnerTheme",
 	"LoserTheme",
+	"PlayerTranslation",
 };
 
 enum ETeamOptions
@@ -101,6 +102,7 @@ enum ETeamOptions
 	TEAMINFO_LoserPic,
 	TEAMINFO_WinnerTheme,
 	TEAMINFO_LoserTheme,
+	TEAMINFO_PlayerTranslation,
 };
 
 // CODE --------------------------------------------------------------------
@@ -119,6 +121,7 @@ FTeam::FTeam ()
 	m_iPresent = 0;
 	m_iTies = 0;
 	m_bAllowCustomPlayerColor = false;
+	m_iPlayerTranslation = -1;
 }
 
 //==========================================================================
@@ -198,7 +201,8 @@ void FTeam::ParseTeamDefinition (FScanner &Scan)
 		case TEAMINFO_AllowCustomPlayerColor:
 			Team.m_bAllowCustomPlayerColor = true;
 			break;
-
+		
+		case TEAMINFO_PlayerTranslation:
 		case TEAMINFO_PlayerStartThingNumber:
 			Scan.MustGetNumber ();
 			break;
@@ -316,6 +320,17 @@ FString FTeam::GetLogo () const
 bool FTeam::GetAllowCustomPlayerColor () const
 {
 	return m_bAllowCustomPlayerColor;
+}
+
+//==========================================================================
+//
+// FTeam :: GetPlayerTranslation
+//
+//==========================================================================
+
+int FTeam::GetPlayerTranslation() const
+{
+	return m_iPlayerTranslation;
 }
 
 //==========================================================================

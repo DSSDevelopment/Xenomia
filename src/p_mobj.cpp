@@ -4448,11 +4448,16 @@ APlayerPawn *P_SpawnPlayer (FPlayerStart *mthing, int playernum, int flags)
 
 	if (!(mobj->flags2 & MF2_DONTTRANSLATE))
 	{
-		// [RH] Be sure the player has the right translation
-		R_BuildPlayerTranslation (playernum);
+		// [DSS] Support for using translation numbers in TEAMINFO
+		if (!teamplay) {
+			// [RH] Be sure the player has the right translation
+			R_BuildPlayerTranslation(playernum);
 
-		// [RH] set color translations for player sprites
-		mobj->Translation = TRANSLATION(TRANSLATION_Players,playernum);
+			// [RH] set color translations for player sprites
+			mobj->Translation = TRANSLATION(TRANSLATION_Players, playernum);
+		} else {
+			mobj->Translation = (&players[playernum].userinfo)->GetTeam()->GetPlayerTranslation();
+		}
 	}
 
 	mobj->angle = spawn_angle;

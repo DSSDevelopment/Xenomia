@@ -53,6 +53,7 @@ public:
 	int GetTextColor () const;
 	FString GetLogo () const;
 	bool GetAllowCustomPlayerColor () const;
+	int GetPlayerTranslation() const;
 
 	int			m_iPlayerCount;
 	int			m_iScore;
@@ -68,6 +69,7 @@ private:
 	FString		m_TextColor;
 	FString		m_Logo;
 	bool		m_bAllowCustomPlayerColor;
+	int			m_iPlayerTranslation;
 };
 
 extern FTeam			TeamLibrary;
