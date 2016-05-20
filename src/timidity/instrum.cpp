@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <cmath>
 
 #include "timidity.h"
 #include "m_swap.h"
