@@ -38,3 +38,7 @@
 /jpeg-6b/x64/
 /lzma/x64/
 /zlib/x64/
+/CMakeFiles
+libmpg123-0.exp
+libmpg123-0.lib
+CMakeCache.txt
