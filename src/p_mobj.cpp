@@ -4456,7 +4456,12 @@ APlayerPawn *P_SpawnPlayer (FPlayerStart *mthing, int playernum, int flags)
 			// [RH] set color translations for player sprites
 			mobj->Translation = TRANSLATION(TRANSLATION_Players, playernum);
 		} else {
-			mobj->Translation = (&players[playernum].userinfo)->GetTeam()->GetPlayerTranslation();
+			int team;
+			userinfo_t *info = &players[playernum].userinfo;
+			if (teamplay && TeamLibrary.IsValidTeam((team = info->GetTeam())) && !Teams[team].GetAllowCustomPlayerColor()) {
+				int translation = TRANSLATION(TRANSLATION_LevelScripted, (Teams[team].GetPlayerTranslation()-1) );
+				mobj->Translation = translation;
+			}
 		}
 	}
 

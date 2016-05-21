@@ -42,6 +42,7 @@
 #include "v_video.h"
 #include "w_wad.h"
 
+
 // MACROS ------------------------------------------------------------------
 
 // TYPES -------------------------------------------------------------------
@@ -68,6 +69,7 @@ static const char *TeamInfoOptions[] =
 	"TextColor",
 	"Logo",
 	"AllowCustomPlayerColor",
+	"PlayerTranslation",
 	"RailColor",
 	"FlagItem",
 	"SkullItem",
@@ -80,7 +82,6 @@ static const char *TeamInfoOptions[] =
 	"LoserPic",
 	"WinnerTheme",
 	"LoserTheme",
-	"PlayerTranslation",
 };
 
 enum ETeamOptions
@@ -90,6 +91,7 @@ enum ETeamOptions
 	TEAMINFO_TextColor,
 	TEAMINFO_Logo,
 	TEAMINFO_AllowCustomPlayerColor,
+	TEAMINFO_PlayerTranslation,
 	TEAMINFO_RailColor,
 	TEAMINFO_FlagItem,
 	TEAMINFO_SkullItem,
@@ -102,7 +104,6 @@ enum ETeamOptions
 	TEAMINFO_LoserPic,
 	TEAMINFO_WinnerTheme,
 	TEAMINFO_LoserTheme,
-	TEAMINFO_PlayerTranslation,
 };
 
 // CODE --------------------------------------------------------------------
@@ -121,7 +122,7 @@ FTeam::FTeam ()
 	m_iPresent = 0;
 	m_iTies = 0;
 	m_bAllowCustomPlayerColor = false;
-	m_iPlayerTranslation = -1;
+	m_iPlayerTranslation = 0;
 }
 
 //==========================================================================
@@ -184,6 +185,7 @@ void FTeam::ParseTeamDefinition (FScanner &Scan)
 			break;
 
 		case TEAMINFO_PlayerColor:
+			Scan.ScriptMessage("Actually trying to get Playercolor.\n");
 			Scan.MustGetString ();
 			Team.m_iPlayerColor = V_GetColor (NULL, Scan.String);
 			break;
@@ -203,6 +205,11 @@ void FTeam::ParseTeamDefinition (FScanner &Scan)
 			break;
 		
 		case TEAMINFO_PlayerTranslation:
+			Scan.MustGetNumber ();
+			Team.m_iPlayerTranslation = Scan.Number;
+			Scan.ScriptMessage("Actually trying to get PlayerTranslation of %d.\n", Team.m_iPlayerTranslation);
+			break;
+
 		case TEAMINFO_PlayerStartThingNumber:
 			Scan.MustGetNumber ();
 			break;

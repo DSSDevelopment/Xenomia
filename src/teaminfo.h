@@ -38,6 +38,7 @@
 #include "doomtype.h"
 #include "sc_man.h"
 
+
 const int TEAM_NONE = 255;
 const int TEAM_MAXIMUM = 16;
 
