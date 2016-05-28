@@ -86,8 +86,8 @@ DMessageBoxMenu::DMessageBoxMenu(DMenu *parent, const char *message, int message
 	messageSelection = 0;
 	mMouseLeft = 140;
 	mMouseY = INT_MIN;
-	int mr1 = 170 + SmallFont->StringWidth(GStrings["TXT_YES"]);
-	int mr2 = 170 + SmallFont->StringWidth(GStrings["TXT_NO"]);
+	int mr1 = 170 + BigFont->StringWidth(GStrings["TXT_YES"]);
+	int mr2 = 170 + BigFont->StringWidth(GStrings["TXT_NO"]);
 	mMouseRight = MAX(mr1, mr2);
 
 	Init(parent, message, messagemode, playsound);
@@ -105,7 +105,7 @@ void DMessageBoxMenu::Init(DMenu *parent, const char *message, int messagemode, 
 	if (message != NULL) 
 	{
 		if (*message == '$') message = GStrings(message+1);
-		mMessage = V_BreakLines(SmallFont, 300, message);
+		mMessage = V_BreakLines(BigFont, 300, message);
 	}
 	else mMessage = NULL;
 	mMessageMode = messagemode;

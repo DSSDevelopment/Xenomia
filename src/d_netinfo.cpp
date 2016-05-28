@@ -326,6 +326,15 @@ static void UpdateTeam (int pnum, int team, bool update)
 	}
 	// Let the player take on the team's color
 	R_BuildPlayerTranslation (pnum);
+
+	// If the team has a custom translation, set it.
+	if (TeamLibrary.IsValidTeam((team = info->GetTeam())) && !Teams[team].GetAllowCustomPlayerColor()) {
+		if ((players[pnum]).mo != NULL) {
+			int translation = TRANSLATION(TRANSLATION_LevelScripted, (Teams[team].GetPlayerTranslation() - 1));
+			(players[pnum]).mo->Translation = translation;
+		}
+	}
+
 	if (StatusBar != NULL && StatusBar->GetPlayer() == pnum)
 	{
 		StatusBar->AttachToPlayer (&players[pnum]);
