@@ -1239,7 +1239,7 @@ bool I_SetCursor(FTexture *cursorpic)
 		(screen == NULL || !screen->Is8BitMode()))
 	{
 		// Must be no larger than 32x32.
-		if (cursorpic->GetWidth() > 32 || cursorpic->GetHeight() > 32)
+		if (cursorpic->GetWidth() > 64 || cursorpic->GetHeight() > 64)
 		{
 			return false;
 		}
@@ -1364,8 +1364,8 @@ static HCURSOR CreateAlphaCursor(FTexture *cursorpic)
 
 	memset(&bi, 0, sizeof(bi));
 	bi.bV5Size = sizeof(bi);
-	bi.bV5Width = 32;
-	bi.bV5Height = 32;
+	bi.bV5Width = 64;
+	bi.bV5Height = 64;
 	bi.bV5Planes = 1;
 	bi.bV5BitCount = 32;
 	bi.bV5Compression = BI_BITFIELDS;
@@ -1390,7 +1390,7 @@ static HCURSOR CreateAlphaCursor(FTexture *cursorpic)
 	}
 
 	// Create an empty mask bitmap, since CreateIconIndirect requires this.
-	mono = CreateBitmap(32, 32, 1, 1, NULL);
+	mono = CreateBitmap(64, 64, 1, 1, NULL);
 	if (mono == NULL)
 	{
 		DeleteObject(color);
@@ -1400,7 +1400,7 @@ static HCURSOR CreateAlphaCursor(FTexture *cursorpic)
 	// Copy cursor to the color bitmap. Note that GDI bitmaps are upside down compared
 	// to normal conventions, so we create the FBitmap pointing at the last row and use
 	// a negative pitch so that CopyTrueColorPixels will use GDI's orientation.
-	FBitmap bmp((BYTE *)bits + 31*32*4, -32*4, 32, 32);
+	FBitmap bmp((BYTE *)bits + 63*64*4, -64*4, 64, 64);
 	cursorpic->CopyTrueColorPixels(&bmp, 0, 0);
 
 	return CreateBitmapCursor(cursorpic->LeftOffset, cursorpic->TopOffset, mono, color);

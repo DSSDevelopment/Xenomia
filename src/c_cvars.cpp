@@ -133,6 +133,12 @@ FBaseCVar::~FBaseCVar ()
 	}
 }
 
+// [DS] adding TextField and NumberField to menudefs. Backport from [TP].
+const char *FBaseCVar::GetHumanString(int precision) const
+{
+	return GetGenericRep(CVAR_String).String;
+}
+
 void FBaseCVar::ForceSet (UCVarValue value, ECVarType type, bool nouserinfosend)
 {
 	DoSet (value, type);
@@ -788,6 +794,11 @@ void FFloatCVar::SetGenericRepDefault (UCVarValue value, ECVarType type)
 		SetGenericRep (value, type);
 		Flags |= CVAR_ISDEFAULT;
 	}
+}
+
+const char * FFloatCVar::GetHumanString(int precision) const
+{
+	return nullptr;
 }
 
 void FFloatCVar::DoSet (UCVarValue value, ECVarType type)

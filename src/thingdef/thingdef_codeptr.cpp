@@ -908,7 +908,10 @@ enum CM_Flags
 	CMF_OFFSETPITCH = 32,
 	CMF_SAVEPITCH = 64,
 
-	CMF_ABSOLUTEANGLE = 128
+	CMF_ABSOLUTEANGLE = 128,
+
+	//[DS] - ability to send Translations down complex inheritance chains that use FireCustomMissile.
+	CMF_TRANSFERTRANSLATION = 256
 };
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMissile)

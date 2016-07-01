@@ -4582,6 +4582,9 @@ enum EACSFunctions
 	// ZDaemon
 	ACSF_GetTeamScore = 19620,	// (int team)
 	ACSF_SetTeamScore,			// (int team, int value)
+
+	//Xenomia
+	ACSF_OpenMenu,
 };
 
 int DLevelScript::SideFromID(int id, int side)
@@ -6372,6 +6375,13 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			{
 				return actor->args[num - 1];
 			}
+			break;
+		}
+
+		case ACSF_OpenMenu:
+		{
+			int script = args[0];
+			C_DoCommand("openmenu agtestmenu");
 			break;
 		}
 

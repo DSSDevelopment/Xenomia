@@ -105,7 +105,7 @@ void DMessageBoxMenu::Init(DMenu *parent, const char *message, int messagemode, 
 	if (message != NULL) 
 	{
 		if (*message == '$') message = GStrings(message+1);
-		mMessage = V_BreakLines(BigFont, 300, message);
+		mMessage = V_BreakLines(SmallFont, 300, message);
 	}
 	else mMessage = NULL;
 	mMessageMode = messagemode;
@@ -178,7 +178,7 @@ void DMessageBoxMenu::Drawer ()
 	int i, y;
 	PalEntry fade = 0;
 
-	int fontheight = SmallFont->GetHeight();
+	int fontheight = BigFont->GetHeight();
 	//V_SetBorderNeedRefresh();
 	//ST_SetNeedRefresh();
 
@@ -193,27 +193,27 @@ void DMessageBoxMenu::Drawer ()
 		{
 			screen->DrawText (SmallFont, CR_UNTRANSLATED, 160 - mMessage[i].Width/2, y, mMessage[i].Text,
 				DTA_Clean, true, TAG_DONE);
-			y += fontheight;
+			y += 8;
 		}
 	}
 
 	if (mMessageMode == 0)
 	{
-		y += fontheight;
+		y += 8;
 		mMouseY = y;
-		screen->DrawText(SmallFont, 
+		screen->DrawText(BigFont, 
 			messageSelection == 0? OptionSettings.mFontColorSelection : OptionSettings.mFontColor, 
-			160, y, GStrings["TXT_YES"], DTA_Clean, true, TAG_DONE);
-		screen->DrawText(SmallFont, 
+			140, y, GStrings["TXT_YES"], DTA_Clean, true, TAG_DONE);
+		screen->DrawText(BigFont, 
 			messageSelection == 1? OptionSettings.mFontColorSelection : OptionSettings.mFontColor, 
-			160, y + fontheight + 1, GStrings["TXT_NO"], DTA_Clean, true, TAG_DONE);
+			140, y + fontheight + 1, GStrings["TXT_NO"], DTA_Clean, true, TAG_DONE);
 
 		if (messageSelection >= 0)
 		{
 			if ((DMenu::MenuTime%8) < 6)
 			{
 				screen->DrawText(ConFont, OptionSettings.mFontColorSelection,
-					(150 - 160) * CleanXfac + screen->GetWidth() / 2,
+					(130 - 160) * CleanXfac + screen->GetWidth() / 2,
 					(y + (fontheight + 1) * messageSelection - 100 + fontheight/2 - 5) * CleanYfac + screen->GetHeight() / 2,
 					"\xd",
 					DTA_CellX, 8 * CleanXfac,
@@ -319,7 +319,7 @@ bool DMessageBoxMenu::MouseEvent(int type, int x, int y)
 	else
 	{
 		int sel = -1;
-		int fh = SmallFont->GetHeight() + 1;
+		int fh = BigFont->GetHeight() + 1;
 
 		// convert x/y from screen to virtual coordinates, according to CleanX/Yfac use in DrawTexture
 		x = ((x - (screen->GetWidth() / 2)) / CleanXfac) + 160;

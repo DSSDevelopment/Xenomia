@@ -436,6 +436,62 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			desc->mItems.Push(it);
 			desc->mYpos += desc->mLinespacing;
 			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size()-1;
+		} 		// [TP] -- Text input widget
+		else if (sc.Compare("TextField"))
+		{
+			sc.MustGetString();
+			FString label = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FString cvar = sc.String;
+			FString check;
+
+			if (sc.CheckString(","))
+			{
+				sc.MustGetString();
+				check = sc.String;
+			}
+
+			FOptionMenuItem* it = new FOptionMenuTextField(label, cvar, check);
+			desc->mItems.Push(it);
+		}
+		// [TP] -- Number input widget
+		else if (sc.Compare("NumberField"))
+		{
+			sc.MustGetString();
+			FString label = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FString cvar = sc.String;
+			float minimum = 0.0f;
+			float maximum = 100.0f;
+			float step = 1.0f;
+			FString check;
+
+			if (sc.CheckString(","))
+			{
+				sc.MustGetFloat();
+				minimum = (float)sc.Float;
+				sc.MustGetStringName(",");
+				sc.MustGetFloat();
+				maximum = (float)sc.Float;
+
+				if (sc.CheckString(","))
+				{
+					sc.MustGetFloat();
+					step = (float)sc.Float;
+
+					if (sc.CheckString(","))
+					{
+						sc.MustGetString();
+						check = sc.String;
+					}
+				}
+			}
+
+			FOptionMenuItem* it = new FOptionMenuNumberField(label, cvar,
+				minimum, maximum, step, check);
+			desc->mItems.Push(it);
 		}
 		else
 		{

@@ -22,7 +22,7 @@
 #endif
 
 #ifndef WINVER
-#define WINVER 0x0501   // default to Windows Version 4.0
+#define WINVER 0x0501   // default to Windows Version 5.1
 #endif
 
 #include <winresrc.h>
