@@ -127,7 +127,7 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 	{
 		{ "he",  "him", "his" },
 		{ "she", "her", "her" },
-		{ "it",  "it",  "its" }
+		{ "they",  "them",  "their" }
 	};
 	static const int gendershift[3][3] =
 	{

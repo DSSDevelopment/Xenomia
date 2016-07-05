@@ -365,7 +365,7 @@ special
 	-125:GetDBEntries(1),
 
 	// GLOOME
-	
+
 	-11192:ChangeFlag(3,4), // void ChangeFlag(int tid, str flagname, bool set[, int pointer])
 	//-11193:SetTicrate(1), // void SetTicrate(int ticrate)
 	-11194:GetTicrate(0),   // int GetTicrate(void)
@@ -385,9 +385,11 @@ special
 	-11208:GetUserDataSize(1),   // int GetUserDataSize(string file)
 	-11209:GetThingSpecial(2),   // int GetThingSpecial(int tid, int num)
 
+	// Xenomia
+	-12000:OpenMenu(1),		//void OpenMenu(int menuID)
+
 	// ZDaemon's
 	-19620:GetTeamScore(1),
 	-19621:SetTeamScore(2),
 
 	-100000:__EndOfList__(10);
-

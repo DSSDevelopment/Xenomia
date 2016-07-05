@@ -4584,7 +4584,7 @@ enum EACSFunctions
 	ACSF_SetTeamScore,			// (int team, int value)
 
 	//Xenomia
-	ACSF_OpenMenu,
+	ACSF_OpenMenu = 12000,
 };
 
 int DLevelScript::SideFromID(int id, int side)
@@ -6380,8 +6380,13 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 
 		case ACSF_OpenMenu:
 		{
-			int script = args[0];
-			C_DoCommand("openmenu agtestmenu");
+			const char *cmd = "openmenu ";
+			const char *menu = FBehavior::StaticLookupString(args[0]);
+			char* result; result = (char*)calloc(strlen(cmd) + strlen(menu) + 1, sizeof(char));
+			strcpy(result, cmd);
+			strcat(result, menu);
+
+			C_DoCommand(result);
 			break;
 		}
 

@@ -49,6 +49,7 @@
 #include "i_music.h"
 #include "m_joy.h"
 #include "gi.h"
+#include "p_acs.h"
 
 #include "optionmenuitems.h"
 
@@ -177,6 +178,30 @@ static bool CheckSkipOptionBlock(FScanner &sc)
 		return !sc.CheckString("else");
 	}
 	return false;
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static bool CheckSkipGlobalBlock(FScanner &sc)
+{
+	bool filter = false;
+	sc.MustGetStringName("(");
+	do
+	{
+		sc.MustGetNumber();
+		int idx = sc.Number;
+		if (idx >= 0 && idx <= sizeof(ACS_GlobalVars))
+		{
+			ACS_GlobalVars[sc.Number];
+		}
+	} while (sc.CheckString(","));
+
+
+	return filter;
 }
 
 //=============================================================================
@@ -445,7 +470,7 @@ static void ParseListMenuBody(FScanner &sc, FListMenuDescriptor *desc)
 			sc.MustGetString();
 			FString cvar = sc.String;
 			FString check;
-
+			
 			if (sc.CheckString(","))
 			{
 				sc.MustGetString();
@@ -695,6 +720,14 @@ static void ParseOptionMenuBody(FScanner &sc, FOptionMenuDescriptor *desc)
 			if (!CheckSkipOptionBlock(sc))
 			{
 				// recursively parse sub-block
+				ParseOptionMenuBody(sc, desc);
+			}
+		}
+		else if (sc.Compare("ifglobal"))
+		{
+			if (true)
+			{
+				//recursively parse sub-block
 				ParseOptionMenuBody(sc, desc);
 			}
 		}

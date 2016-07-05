@@ -2447,12 +2447,12 @@ void D_DoomMain (void)
 			}
 		}
 
-		if (!restart)
-		{
+		//if (!restart)
+		//{
 			Printf ("D_CheckNetGame: Checking network game status.\n");
 			StartScreen->LoadingStatus ("Checking network game status.", 0x3f);
 			D_CheckNetGame ();
-		}
+		//}
 
 		// [RH] Lock any cvars that should be locked now that we're
 		// about to begin the game.
