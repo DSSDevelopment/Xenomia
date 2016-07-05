@@ -93,6 +93,38 @@ struct FMenuDescriptor
 
 class FListMenuItem;
 class FOptionMenuItem;
+class FLayoutMenuItem;
+
+struct FLayoutMenuDescriptor : public FMenuDescriptor
+{
+	TDeletingArray<FLayoutMenuItem *> mItems;
+	int mSelectedItem;
+	int mSelectOfsX;
+	int mSelectOfsY;
+	FTextureID mSelector;
+	int mDisplayTop;
+	int mXpos, mYpos;
+	int mWLeft, mWRight;
+	FFont *mFont;
+	EColorRange mFontColor;
+	EColorRange mFontColor2;
+	bool mCenter;
+
+	void Reset()
+	{
+		// Reset the default settings (ignore all other values in the struct)
+		mSelectOfsX = 0;
+		mSelectOfsY = 0;
+		mSelector.SetInvalid();
+		mDisplayTop = 0;
+		mXpos = 0;
+		mYpos = 0;
+		mNetgameMessage = "";
+		mFont = NULL;
+		mFontColor = CR_UNTRANSLATED;
+		mFontColor2 = CR_UNTRANSLATED;
+	}
+};
 
 struct FListMenuDescriptor : public FMenuDescriptor
 {
@@ -494,6 +526,44 @@ public:
 
 //=============================================================================
 //
+// Layout menu class runs a menu described by a FLayoutMenuDescriptor
+//
+//=============================================================================
+
+class DLayoutMenu : public DMenu
+{
+	DECLARE_CLASS(DLayoutMenu, DMenu);
+
+protected:
+	FLayoutMenuDescriptor *mDesc;
+	FLayoutMenuItem *mFocusControl;
+
+public:
+	DLayoutMenu(DMenu *parent = NULL, FLayoutMenuDescriptor *desc = NULL);
+	virtual void Init(DMenu *parent = NULL, FLayoutMenuDescriptor *desc = NULL);
+	FLayoutMenuItem *GetItem(FName name);
+	bool Responder(event_t *ev);
+	bool MenuEvent(int mkey, bool fromcontroller);
+	bool MouseEvent(int type, int x, int y);
+	void Ticker();
+	void Drawer();
+	void SetFocus(FLayoutMenuItem *fc)
+	{
+		mFocusControl = fc;
+	}
+	bool CheckFocus(FLayoutMenuItem *fc)
+	{
+		return mFocusControl == fc;
+	}
+	void ReleaseFocus()
+	{
+		mFocusControl = NULL;
+	}
+
+};
+
+//=============================================================================
+//
 // list menu class runs a menu described by a FListMenuDescriptor
 //
 //=============================================================================
@@ -579,7 +649,6 @@ struct FOptionValues
 typedef TMap< FName, FOptionValues* > FOptionMap;
 
 extern FOptionMap OptionValues;
-
 
 //=============================================================================
 //
