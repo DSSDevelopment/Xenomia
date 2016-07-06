@@ -185,7 +185,6 @@ void FTeam::ParseTeamDefinition (FScanner &Scan)
 			break;
 
 		case TEAMINFO_PlayerColor:
-			Scan.ScriptMessage("Actually trying to get Playercolor.\n");
 			Scan.MustGetString ();
 			Team.m_iPlayerColor = V_GetColor (NULL, Scan.String);
 			break;
@@ -207,7 +206,6 @@ void FTeam::ParseTeamDefinition (FScanner &Scan)
 		case TEAMINFO_PlayerTranslation:
 			Scan.MustGetNumber ();
 			Team.m_iPlayerTranslation = Scan.Number;
-			Scan.ScriptMessage("Actually trying to get PlayerTranslation of %d.\n", Team.m_iPlayerTranslation);
 			break;
 
 		case TEAMINFO_PlayerStartThingNumber:

@@ -1004,6 +1004,11 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CustomMissile)
 					// otherwise affecting the spawned actor.
 				}
 
+				if (CMF_TRANSFERTRANSLATION & flags)
+				{
+					missile->Translation = self->Translation;
+				}
+
 				missile->angle = (CMF_ABSOLUTEANGLE & flags) ? Angle : missile->angle + Angle ;
 
 				ang = missile->angle >> ANGLETOFINESHIFT;
