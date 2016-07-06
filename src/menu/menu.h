@@ -79,6 +79,7 @@ enum EMenuDescriptorType
 {
 	MDESC_ListMenu,
 	MDESC_OptionsMenu,
+	MDESC_LayoutMenu
 };
 
 struct FMenuDescriptor

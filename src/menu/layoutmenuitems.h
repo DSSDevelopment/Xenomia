@@ -79,17 +79,19 @@ public:
 		//mCentered = center;
 	}
 
-	~FLayoutMenuItem();
-	virtual int Draw(FLayoutMenuDescriptor *desc, int y, int indent, bool selected);
+	//~FLayoutMenuItem();
+	/*virtual int Draw(FLayoutMenuDescriptor *desc, int y, int indent, bool selected);
 	virtual bool Selectable();
 	virtual int GetIndent();
-	virtual bool MouseEvent(int type, int x, int y);
+	*/
+	//virtual bool MouseEvent(int type, int x, int y);
 };
 
-
+/*
 FLayoutMenuItem::~FLayoutMenuItem()
 {
 }
+
 
 int FLayoutMenuItem::Draw(FLayoutMenuDescriptor *desc, int y, int indent, bool selected)
 {
@@ -108,10 +110,13 @@ bool FLayoutMenuItem::Selectable()
 	return false;
 }
 
+
+
 bool FLayoutMenuItem::MouseEvent(int type, int x, int y)
 {
 	return false;
 }
+*/
 
 class FLayoutMenuItemStaticPatch : public FLayoutMenuItem
 {
@@ -153,7 +158,7 @@ protected:
 	int mParam;
 
 public:
-	FLayoutMenuItemSelectable(int x, int y, int width, int height, FName childmenu, int mParam = -1);
+	FLayoutMenuItemSelectable(int x, int y, FName childmenu, int mParam = -1);
 	bool CheckCoordinate(int x, int y);
 	bool Selectable();
 	bool CheckHotkey(int c);
@@ -169,7 +174,7 @@ class FLayoutMenuItemText : public FLayoutMenuItemSelectable
 	EColorRange mColor;
 	EColorRange mColorSelected;
 public:
-	FLayoutMenuItemText(int x, int y, int width, int height, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0);
+	FLayoutMenuItemText(int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0);
 	~FLayoutMenuItemText();
 	void Drawer(bool selected);
 	int GetWidth();
@@ -180,6 +185,7 @@ class FLayoutMenuItemPatch : public FLayoutMenuItemSelectable
 	FTextureID mTexture;
 public:
 	FLayoutMenuItemPatch(int x, int y, int width, int height, int hotkey, FTextureID patch, FName child, int param = 0);
+	bool CheckCoordinate(int x, int y);
 	void Drawer(bool selected);
 	int GetWidth();
 };
@@ -195,10 +201,10 @@ class FLayoutMenuItemSubmenu : public FLayoutMenuItemText
 {
 	int mParam;
 public:
-	FLayoutMenuItemSubmenu(const char *menu, int x, int y, int width, int height, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0)
-		: FLayoutMenuItemText(x, y, width, height, hotkey, text, font, color, color2, child, param)
+	FLayoutMenuItemSubmenu(const char *menu, int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2)
+		: FLayoutMenuItemText(x, y, hotkey, text, font, color, color2, NAME_None, 0)
 	{
-		mParam = param;
+		mParam = 0;
 		mAction = menu;
 	}
 
@@ -219,8 +225,8 @@ public:
 class FLayoutMenuItemCommand : public FLayoutMenuItemSubmenu
 {
 public:
-	FLayoutMenuItemCommand(const char *action, int x, int y, int width, int height, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0)
-		: FLayoutMenuItemSubmenu(action, x, y, width, height, hotkey, text, font, color, color2, child, param)
+	FLayoutMenuItemCommand(const char *action, int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2)
+		: FLayoutMenuItemSubmenu(action, x, y, hotkey, text, font, color, color2)
 	{
 		mAction = action;
 	}
@@ -244,8 +250,8 @@ public:
 class FLayoutMenuItemACSCommand : public FLayoutMenuItemSubmenu
 {
 public:
-	FLayoutMenuItemACSCommand(const char *action, int x, int y, int width, int height, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0)
-		: FLayoutMenuItemSubmenu(action, x, y, width, height, hotkey, text, font, color, color2, child, param)
+	FLayoutMenuItemACSCommand(const char *action, int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2)
+		: FLayoutMenuItemSubmenu(action, x, y, hotkey, text, font, color, color2)
 	{
 		mAction = action;
 	}
@@ -258,7 +264,7 @@ public:
 		strcpy(result, cmd);
 		strcat(result, mAction);
 
-		C_DoCommand(mAction);
+		C_DoCommand(result);
 		return true;
 	}
 

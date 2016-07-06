@@ -52,6 +52,7 @@
 #include "p_acs.h"
 
 #include "optionmenuitems.h"
+#include "layoutmenuitems.h"
 
 void ClearSaveGames();
 
@@ -188,20 +189,31 @@ static bool CheckSkipOptionBlock(FScanner &sc)
 
 static bool CheckSkipGlobalBlock(FScanner &sc)
 {
-	bool filter = false;
+	bool skip = false;
+	int global = -1;
 	sc.MustGetStringName("(");
-	do
+
+	sc.MustGetNumber();
+	int idx = sc.Number;
+	if (idx >= 0 && idx <= sizeof(ACS_GlobalVars))
 	{
-		sc.MustGetNumber();
-		int idx = sc.Number;
-		if (idx >= 0 && idx <= sizeof(ACS_GlobalVars))
-		{
-			ACS_GlobalVars[sc.Number];
-		}
-	} while (sc.CheckString(","));
-
-
-	return filter;
+		int global = ACS_GlobalVars[idx];
+	}
+	else {
+		skip = true;
+	}
+	sc.MustGetStringName(",");
+	sc.MustGetNumber();
+	if ( global == sc.Number ) {
+		skip = false;
+	}
+	sc.MustGetStringName(")");
+	if (skip)
+	{
+		SkipSubBlock(sc);
+		return true;
+	}
+	return skip;
 }
 
 //=============================================================================
@@ -599,6 +611,421 @@ static void ParseListMenu(FScanner &sc)
 //
 //=============================================================================
 
+static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
+{
+	sc.MustGetStringName("{");
+	while (!sc.CheckString("}"))
+	{
+		sc.MustGetString();
+		if (sc.Compare("else"))
+		{
+			SkipSubBlock(sc);
+		}
+		else if (sc.Compare("ifgame"))
+		{
+			if (!CheckSkipGameBlock(sc))
+			{
+				// recursively parse sub-block
+				ParseLayoutMenuBody(sc, desc);
+			}
+		}
+		else if (sc.Compare("ifoption"))
+		{
+			if (!CheckSkipOptionBlock(sc))
+			{
+				// recursively parse sub-block
+				ParseLayoutMenuBody(sc, desc);
+			}
+		}
+		else if (sc.Compare("ifglobal"))
+		{
+			if (!CheckSkipGlobalBlock(sc))
+			{
+				ParseLayoutMenuBody(sc, desc);
+			}
+		}
+		else if (sc.Compare("Class"))
+		{
+			sc.MustGetString();
+			const PClass *cls = PClass::FindClass(sc.String);
+			if (cls == NULL || !cls->IsDescendantOf(RUNTIME_CLASS(DLayoutMenu)))
+			{
+				sc.ScriptError("Unknown menu class '%s'", sc.String);
+			}
+			desc->mClass = cls;
+		}
+		else if (sc.Compare("Selector"))
+		{
+			sc.MustGetString();
+			desc->mSelector = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			desc->mSelectOfsX = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			desc->mSelectOfsY = sc.Number;
+		}
+		/*
+		else if (sc.Compare("Linespacing"))
+		{
+			sc.MustGetNumber();
+			desc->mLinespacing = sc.Number;
+		}
+		*/
+		else if (sc.Compare("Position"))
+		{
+			sc.MustGetNumber();
+			desc->mXpos = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			desc->mYpos = sc.Number;
+		}
+		/*
+		else if (sc.Compare("Centermenu"))
+		{
+			desc->mCenter = true;
+		}
+		*/
+		else if (sc.Compare("MouseWindow"))
+		{
+			sc.MustGetNumber();
+			desc->mWLeft = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			desc->mWRight = sc.Number;
+		}
+		else if (sc.Compare("StaticPatch"))
+		{
+			//bool centered = sc.Compare("StaticPatchCentered");
+			sc.MustGetNumber();
+			int x = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int y = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+
+			FLayoutMenuItem *it = new FLayoutMenuItemStaticPatch(x, y, tex, false);
+			desc->mItems.Push(it);
+		}
+		else if (sc.Compare("StaticText"))
+		{
+			sc.MustGetNumber();
+			int x = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int y = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FLayoutMenuItem *it = new FLayoutMenuItemStaticText(x, y, sc.String, desc->mFont, desc->mFontColor, false);
+			desc->mItems.Push(it);
+		}
+		else if (sc.Compare("PatchItem"))
+		{
+			sc.MustGetString();
+			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			int hotkey = sc.String[0];
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FName action = sc.String;
+			int param = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				param = sc.Number;
+			}
+			int width = TexMan[tex]->GetScaledWidth();
+			int height = TexMan[tex]->GetScaledHeight();
+			FLayoutMenuItem *it = new FLayoutMenuItemPatch(desc->mXpos, desc->mYpos, width, height, hotkey, tex, action, param);
+			desc->mItems.Push(it);
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+		}
+		else if (sc.Compare("TextItem"))
+		{
+			sc.MustGetString();
+			FString text = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			int hotkey = sc.String[0];
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FName action = sc.String;
+			int param = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				param = sc.Number;
+			}
+
+			FLayoutMenuItem *it = new FLayoutMenuItemText(desc->mXpos, desc->mYpos, hotkey, text, desc->mFont, desc->mFontColor, desc->mFontColor2, action, param);
+			desc->mItems.Push(it);
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+
+		}
+		else if (sc.Compare("Font"))
+		{
+			sc.MustGetString();
+			FFont *newfont = V_GetFont(sc.String);
+			if (newfont != NULL) desc->mFont = newfont;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetString();
+				desc->mFontColor2 = desc->mFontColor = V_FindFontColor((FName)sc.String);
+				if (sc.CheckString(","))
+				{
+					sc.MustGetString();
+					desc->mFontColor2 = V_FindFontColor((FName)sc.String);
+				}
+			}
+			else
+			{
+				desc->mFontColor = OptionSettings.mFontColor;
+				desc->mFontColor2 = OptionSettings.mFontColorValue;
+			}
+		}
+		else if (sc.Compare("NetgameMessage"))
+		{
+			sc.MustGetString();
+			desc->mNetgameMessage = sc.String;
+		}
+		else if (sc.Compare("Submenu"))
+		{
+			sc.MustGetString();
+			FString label = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			const char *menu = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			int hotkey = sc.String[0];
+			//	FLayoutMenuItemSubmenu(const char *menu, int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0)
+
+			FLayoutMenuItem *it = new FLayoutMenuItemSubmenu(menu, desc->mXpos, desc->mYpos, hotkey, label, desc->mFont, desc->mFontColor, desc->mFontColor2);
+			desc->mItems.Push(it);
+		}
+		else if (sc.Compare("Command"))
+		{
+			sc.MustGetString();
+			FString label = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			const char *command = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			int hotkey = sc.String[0];
+			//FLayoutMenuItemCommand(const char *action, int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0)
+
+			FLayoutMenuItem *it = new FLayoutMenuItemCommand(command, desc->mXpos, desc->mYpos, hotkey, label, desc->mFont, desc->mFontColor, desc->mFontColor2);
+			desc->mItems.Push(it);
+		}
+		else if (sc.Compare("ACSCommand"))
+		{
+			sc.MustGetString();
+			FString label = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			const char *command = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			int hotkey = sc.String[0];
+			//FLayoutMenuItemCommand(const char *action, int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0)
+
+			FLayoutMenuItem *it = new FLayoutMenuItemACSCommand(command, desc->mXpos, desc->mYpos, hotkey, label, desc->mFont, desc->mFontColor, desc->mFontColor2);
+			desc->mItems.Push(it);
+		}
+		/*else if (sc.Compare("PlayerDisplay"))
+		{
+			bool noportrait = false;
+			FName action = NAME_None;
+			sc.MustGetNumber();
+			int x = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int y = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			PalEntry c1 = V_GetColor(NULL, sc.String);
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			PalEntry c2 = V_GetColor(NULL, sc.String);
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				noportrait = !!sc.Number;
+				if (sc.CheckString(","))
+				{
+					sc.MustGetString();
+					action = sc.String;
+				}
+			}
+			FListMenuItemPlayerDisplay *it = new FListMenuItemPlayerDisplay(desc, x, y, c1, c2, noportrait, action);
+			desc->mItems.Push(it);
+		}
+		
+		else if (sc.Compare("PlayerNameBox"))
+		{
+			sc.MustGetString();
+			FString text = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int ofs = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FListMenuItem *it = new FPlayerNameBox(desc->mXpos, desc->mYpos, desc->mLinespacing, ofs, text, desc->mFont, desc->mFontColor, sc.String);
+			desc->mItems.Push(it);
+			desc->mYpos += desc->mLinespacing;
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+		}
+		else if (sc.Compare("ValueText"))
+		{
+			sc.MustGetString();
+			FString text = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FName action = sc.String;
+			FName values;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetString();
+				values = sc.String;
+			}
+			FListMenuItem *it = new FValueTextItem(desc->mXpos, desc->mYpos, desc->mLinespacing, text, desc->mFont, desc->mFontColor, desc->mFontColor2, action, values);
+			desc->mItems.Push(it);
+			desc->mYpos += desc->mLinespacing;
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+		}
+		else if (sc.Compare("Slider"))
+		{
+			sc.MustGetString();
+			FString text = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FString action = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int min = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int max = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int step = sc.Number;
+			FListMenuItem *it = new FSliderItem(desc->mXpos, desc->mYpos, desc->mLinespacing, text, desc->mFont, desc->mFontColor, action, min, max, step);
+			desc->mItems.Push(it);
+			desc->mYpos += desc->mLinespacing;
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+		} 		// [TP] -- Text input widget
+		else if (sc.Compare("TextField"))
+		{
+			sc.MustGetString();
+			FString label = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FString cvar = sc.String;
+			FString check;
+
+			if (sc.CheckString(","))
+			{
+				sc.MustGetString();
+				check = sc.String;
+			}
+
+			FOptionMenuItem* it = new FOptionMenuTextField(label, cvar, check);
+			desc->mItems.Push(it);
+		}
+		// [TP] -- Number input widget
+		else if (sc.Compare("NumberField"))
+		{
+			sc.MustGetString();
+			FString label = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FString cvar = sc.String;
+			float minimum = 0.0f;
+			float maximum = 100.0f;
+			float step = 1.0f;
+			FString check;
+
+			if (sc.CheckString(","))
+			{
+				sc.MustGetFloat();
+				minimum = (float)sc.Float;
+				sc.MustGetStringName(",");
+				sc.MustGetFloat();
+				maximum = (float)sc.Float;
+
+				if (sc.CheckString(","))
+				{
+					sc.MustGetFloat();
+					step = (float)sc.Float;
+
+					if (sc.CheckString(","))
+					{
+						sc.MustGetString();
+						check = sc.String;
+					}
+				}
+			}
+
+			FOptionMenuItem* it = new FOptionMenuNumberField(label, cvar,
+				minimum, maximum, step, check);
+			desc->mItems.Push(it);
+		}
+		*/
+		else
+		{
+			sc.ScriptError("Unknown keyword '%s'", sc.String);
+		}
+	}
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+static void ParseLayoutMenu(FScanner &sc)
+{
+	sc.MustGetString();
+
+	FLayoutMenuDescriptor *desc = new FLayoutMenuDescriptor;
+	desc->mType = MDESC_LayoutMenu;
+	desc->mMenuName = sc.String;
+	desc->mSelectedItem = -1;
+	//desc->mAutoselect = -1;
+	desc->mSelectOfsX = DefaultListMenuSettings.mSelectOfsX;
+	desc->mSelectOfsY = DefaultListMenuSettings.mSelectOfsY;
+	desc->mSelector = DefaultListMenuSettings.mSelector;
+	desc->mDisplayTop = DefaultListMenuSettings.mDisplayTop;
+	desc->mXpos = DefaultListMenuSettings.mXpos;
+	desc->mYpos = DefaultListMenuSettings.mYpos;
+	//desc->mLinespacing = DefaultListMenuSettings.mLinespacing;
+	desc->mNetgameMessage = DefaultListMenuSettings.mNetgameMessage;
+	desc->mFont = DefaultListMenuSettings.mFont;
+	desc->mFontColor = DefaultListMenuSettings.mFontColor;
+	desc->mFontColor2 = DefaultListMenuSettings.mFontColor2;
+	desc->mClass = NULL;
+	//desc->mRedirect = NULL;
+	desc->mWLeft = 0;
+	desc->mWRight = 0;
+	desc->mCenter = false;
+
+	ParseLayoutMenuBody(sc, desc);
+	bool scratch = ReplaceMenu(sc, desc);
+	if (scratch) delete desc;
+}
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+
+
 static void ParseOptionValue(FScanner &sc)
 {
 	FName optname;
@@ -967,6 +1394,10 @@ void M_ParseMenuDefs()
 			if (sc.Compare("LISTMENU"))
 			{
 				ParseListMenu(sc);
+			}
+			else if (sc.Compare("LAYOUTMENU"))
+			{
+				ParseLayoutMenu(sc);
 			}
 			else if (sc.Compare("DEFAULTLISTMENU"))
 			{

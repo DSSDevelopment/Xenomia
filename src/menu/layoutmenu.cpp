@@ -227,11 +227,11 @@ FLayoutMenuItemStaticText::~FLayoutMenuItemStaticText()
 //
 //=============================================================================
 
-FLayoutMenuItemSelectable::FLayoutMenuItemSelectable(int x, int y, int width, int height, FName action, int param)
+FLayoutMenuItemSelectable::FLayoutMenuItemSelectable(int x, int y, FName action, int param)
 	: FLayoutMenuItem(x, y, action)
 {
-	mWidth = width;
-	mHeight = height;
+	mWidth = 1;
+	mHeight = 1;
 	mParam = param;
 	mHotkey = 0;
 }
@@ -281,14 +281,16 @@ bool FLayoutMenuItemSelectable::MouseEvent(int type, int x, int y)
 //
 //=============================================================================
 
-FLayoutMenuItemText::FLayoutMenuItemText(int x, int y, int width, int height, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param)
-	: FLayoutMenuItemSelectable(x, y, width, height, child, param)
+FLayoutMenuItemText::FLayoutMenuItemText(int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param)
+	: FLayoutMenuItemSelectable(x, y, child, param)
 {
 	mText = ncopystring(text);
 	mFont = font;
 	mColor = color;
 	mColorSelected = color2;
 	mHotkey = hotkey;
+	mWidth = this->GetWidth();
+	mHeight = mFont->GetHeight();
 }
 
 FLayoutMenuItemText::~FLayoutMenuItemText()
@@ -328,8 +330,10 @@ int FLayoutMenuItemText::GetWidth()
 //=============================================================================
 
 FLayoutMenuItemPatch::FLayoutMenuItemPatch(int x, int y, int width, int height, int hotkey, FTextureID patch, FName child, int param)
-	: FLayoutMenuItemSelectable(x, y, width, height, child, param)
+	: FLayoutMenuItemSelectable(x, y, child, param)
 {
+	mWidth = width;
+	mHeight = height;
 	mHotkey = hotkey;
 	mTexture = patch;
 }
@@ -339,9 +343,16 @@ void FLayoutMenuItemPatch::Drawer(bool selected)
 	screen->DrawTexture(TexMan(mTexture), mXpos, mYpos, DTA_Clean, true, TAG_DONE);
 }
 
+bool FLayoutMenuItemPatch::CheckCoordinate(int x, int y)
+{
+	return mEnabled && y >= mYpos - mHeight && y < mYpos && x >= mXpos - mWidth/2 && x < mXpos + mWidth/2;	// added x check.
+}
+
 int FLayoutMenuItemPatch::GetWidth()
 {
 	return mTexture.isValid()
 		? TexMan[mTexture]->GetScaledWidth()
 		: 0;
 }
+
+

@@ -442,6 +442,16 @@ void M_SetMenu(FName menu, int param)
 			newmenu->Init(DMenu::CurrentMenu, ld);
 			M_ActivateMenu(newmenu);
 		}
+		else if ((*desc)->mType == MDESC_LayoutMenu)
+		{
+			M_Init();
+			FLayoutMenuDescriptor *ld = static_cast<FLayoutMenuDescriptor*>(*desc);
+			const PClass *cls = ld->mClass == NULL ? RUNTIME_CLASS(DLayoutMenu) : ld->mClass;
+
+			DLayoutMenu *newMenu = (DLayoutMenu *)cls->CreateNew();
+			newMenu->Init(DMenu::CurrentMenu, ld);
+			M_ActivateMenu(newMenu);
+		}
 		return;
 	}
 	else
