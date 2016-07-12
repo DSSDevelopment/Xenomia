@@ -213,6 +213,7 @@ void FLayoutMenuItemStaticText::Drawer(bool selected)
 	}
 }
 
+
 FLayoutMenuItemStaticText::~FLayoutMenuItemStaticText()
 {
 	if (mText != NULL) delete[] mText;
@@ -355,4 +356,55 @@ int FLayoutMenuItemPatch::GetWidth()
 		: 0;
 }
 
+//=============================================================================
+//
+// global patch item
+//
+//=============================================================================
 
+FLayoutMenuItemGlobalPatch::FLayoutMenuItemGlobalPatch(int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalVar, int comparator, int param)
+	: FLayoutMenuItemPatch(x, y, width, height, hotkey, enabledPatch, child, param)
+{
+	enabled = true;
+	mTextureDisabled = disabledPatch;
+	global = globalVar;
+	idx = consoleplayer;
+	gComparator = comparator;
+}
+
+void FLayoutMenuItemGlobalPatch::Ticker()
+{
+	if (global != NULL && global < 64) {
+		int x = 0;
+		//Use the array index; assume the global is an array.
+		x = ACS_GlobalArrays[global][idx];
+		enabled = x >= gComparator;
+	}
+}
+
+bool FLayoutMenuItemGlobalPatch::CheckCoordinate(int x, int y)
+{
+	return mEnabled && y >= mYpos - mHeight && y < mYpos && x >= mXpos - mWidth / 2 && x < mXpos + mWidth / 2;	// added x check.
+}
+
+void FLayoutMenuItemGlobalPatch::Drawer(bool selected)
+{
+	if (enabled) {
+		screen->DrawTexture(TexMan(mTexture), mXpos, mYpos, DTA_Clean, true, TAG_DONE);
+	}
+	else {
+		screen->DrawTexture(TexMan(mTextureDisabled), mXpos, mYpos, DTA_Clean, true, TAG_DONE);
+	}
+}
+
+bool FLayoutMenuItemGlobalPatch::Selectable()
+{
+	return false;
+}
+
+int FLayoutMenuItemGlobalPatch::GetWidth()
+{
+	return mTexture.isValid()
+		? TexMan[mTexture]->GetScaledWidth()
+		: 0;
+}

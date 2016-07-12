@@ -444,7 +444,6 @@ void M_SetMenu(FName menu, int param)
 		}
 		else if ((*desc)->mType == MDESC_LayoutMenu)
 		{
-			M_Init();
 			FLayoutMenuDescriptor *ld = static_cast<FLayoutMenuDescriptor*>(*desc);
 			const PClass *cls = ld->mClass == NULL ? RUNTIME_CLASS(DLayoutMenu) : ld->mClass;
 

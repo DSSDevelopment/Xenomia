@@ -711,6 +711,7 @@ static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
 		}
 		else if (sc.Compare("StaticText"))
 		{
+			bool centered = sc.Compare("StaticTextCentered");
 			sc.MustGetNumber();
 			int x = sc.Number;
 			sc.MustGetStringName(",");
@@ -750,19 +751,19 @@ static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			int hotkey = sc.String[0];
-			sc.MustGetStringName(",");
-			sc.MustGetString();
-			FName action = sc.String;
-			int param = 0;
-			if (sc.CheckString(","))
-			{
-				sc.MustGetNumber();
-				param = sc.Number;
-			}
+sc.MustGetStringName(",");
+sc.MustGetString();
+FName action = sc.String;
+int param = 0;
+if (sc.CheckString(","))
+{
+	sc.MustGetNumber();
+	param = sc.Number;
+}
 
-			FLayoutMenuItem *it = new FLayoutMenuItemText(desc->mXpos, desc->mYpos, hotkey, text, desc->mFont, desc->mFontColor, desc->mFontColor2, action, param);
-			desc->mItems.Push(it);
-			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+FLayoutMenuItem *it = new FLayoutMenuItemText(desc->mXpos, desc->mYpos, hotkey, text, desc->mFont, desc->mFontColor, desc->mFontColor2, action, param);
+desc->mItems.Push(it);
+if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 
 		}
 		else if (sc.Compare("Font"))
@@ -835,6 +836,40 @@ static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
 
 			FLayoutMenuItem *it = new FLayoutMenuItemACSCommand(command, desc->mXpos, desc->mYpos, hotkey, label, desc->mFont, desc->mFontColor, desc->mFontColor2);
 			desc->mItems.Push(it);
+		}
+		else if (sc.Compare("GlobalPatchItem"))
+		{
+			sc.MustGetNumber();
+			int global = sc.Number; //global variable
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FTextureID disabledTex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FName action = sc.String;
+			
+			
+			int comparator = 1;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				comparator = sc.Number;
+			}
+			int param = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				param = sc.Number;
+			}
+			
+			int width = TexMan[tex]->GetScaledWidth();
+			int height = TexMan[tex]->GetScaledHeight();
+			FLayoutMenuItem *it = new FLayoutMenuItemGlobalPatch(desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param);
+			desc->mItems.Push(it);
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 		}
 		/*else if (sc.Compare("PlayerDisplay"))
 		{

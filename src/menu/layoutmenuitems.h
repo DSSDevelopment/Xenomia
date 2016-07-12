@@ -182,6 +182,7 @@ public:
 
 class FLayoutMenuItemPatch : public FLayoutMenuItemSelectable
 {
+protected:
 	FTextureID mTexture;
 public:
 	FLayoutMenuItemPatch(int x, int y, int width, int height, int hotkey, FTextureID patch, FName child, int param = 0);
@@ -190,6 +191,74 @@ public:
 	int GetWidth();
 };
 
+
+//=============================================================================
+//
+// [DS] patch that is enabled depending on the value of an ACS global variable.
+//
+//=============================================================================
+class FLayoutMenuItemGlobalPatch : public FLayoutMenuItemPatch
+{
+	int global;		// The index of an ACS Global Variable.
+	int idx;		// The index of the array within that global (optional).
+	int gComparator; // The value of the ACS Global has to be equal to or greater than this value for the item to be enabled.
+	FTextureID mTextureDisabled;
+protected:
+	bool enabled;
+public:
+	FLayoutMenuItemGlobalPatch(int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalVar, int comparator = 1, int param = 0);
+	bool CheckCoordinate(int x, int y);
+	void Drawer(bool selected);
+	void Ticker();
+	bool Selectable();
+	int GetWidth();
+
+
+};
+
+class FLayoutMenuItemGlobalSubmenuPatch : public FLayoutMenuItemGlobalPatch
+{
+	FLayoutMenuItemGlobalSubmenuPatch(const char *menu, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator = 1, int param = 0)
+		: FLayoutMenuItemGlobalPatch(x, y, width, height, hotkey, enabledPatch, disabledPatch, child, globalvar, comparator, param)
+	{
+		mAction = menu;
+	}
+
+public:
+	bool Selectable()
+	{
+		return enabled;
+	}
+
+	bool Activate()
+	{
+		S_Sound(CHAN_VOICE | CHAN_UI, "menu/choose", snd_menuvolume, ATTN_NONE);
+		M_SetMenu(mAction, mParam);
+		return true;
+	}
+};
+
+class FLayoutMenuItemGlobalCommandPatch : public FLayoutMenuItemGlobalPatch
+{
+	FLayoutMenuItemGlobalCommandPatch(const char *command, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator = 1, int param = 0)
+		: FLayoutMenuItemGlobalPatch(x, y, width, height, hotkey, enabledPatch, disabledPatch, child, globalvar, comparator, param)
+	{
+		mAction = command;
+	}
+
+public:
+	bool Selectable()
+	{
+		return enabled;
+	}
+
+	bool Activate()
+	{
+		S_Sound(CHAN_VOICE | CHAN_UI, "menu/choose", snd_menuvolume, ATTN_NONE);
+		C_DoCommand(mAction);
+		return true;
+	}
+};
 
 //=============================================================================
 //
@@ -203,6 +272,31 @@ class FLayoutMenuItemSubmenu : public FLayoutMenuItemText
 public:
 	FLayoutMenuItemSubmenu(const char *menu, int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2)
 		: FLayoutMenuItemText(x, y, hotkey, text, font, color, color2, NAME_None, 0)
+	{
+		mParam = 0;
+		mAction = menu;
+	}
+
+	bool Activate()
+	{
+		S_Sound(CHAN_VOICE | CHAN_UI, "menu/choose", snd_menuvolume, ATTN_NONE);
+		M_SetMenu(mAction, mParam);
+		return true;
+	}
+};
+
+//=============================================================================
+//
+// opens a submenu and displays a patch, action is a submenu name
+//
+//=============================================================================
+
+class FLayoutMenuItemPatchSubmenu : public FLayoutMenuItemPatch
+{
+	int mParam;
+public:
+	FLayoutMenuItemPatchSubmenu(const char *menu, int x, int y, int width, int height, int hotkey, FTextureID patch, FName child, int param)
+		: FLayoutMenuItemPatch(x, y, width, height, hotkey, patch, child, param)
 	{
 		mParam = 0;
 		mAction = menu;
