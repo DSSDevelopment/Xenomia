@@ -218,13 +218,13 @@ public:
 
 class FLayoutMenuItemGlobalSubmenuPatch : public FLayoutMenuItemGlobalPatch
 {
+public:
 	FLayoutMenuItemGlobalSubmenuPatch(const char *menu, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator = 1, int param = 0)
 		: FLayoutMenuItemGlobalPatch(x, y, width, height, hotkey, enabledPatch, disabledPatch, child, globalvar, comparator, param)
 	{
 		mAction = menu;
 	}
 
-public:
 	bool Selectable()
 	{
 		return enabled;
@@ -240,13 +240,13 @@ public:
 
 class FLayoutMenuItemGlobalCommandPatch : public FLayoutMenuItemGlobalPatch
 {
+public:
 	FLayoutMenuItemGlobalCommandPatch(const char *command, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator = 1, int param = 0)
 		: FLayoutMenuItemGlobalPatch(x, y, width, height, hotkey, enabledPatch, disabledPatch, child, globalvar, comparator, param)
 	{
 		mAction = command;
 	}
 
-public:
 	bool Selectable()
 	{
 		return enabled;

@@ -871,6 +871,80 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 			desc->mItems.Push(it);
 			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 		}
+		else if (sc.Compare("GlobalPatchSubmenu"))
+		{
+			sc.MustGetNumber();
+			int global = sc.Number; //global variable
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			const char *menu = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FTextureID disabledTex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FName action = sc.String;
+
+
+			int comparator = 1;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				comparator = sc.Number;
+			}
+			int param = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				param = sc.Number;
+			}
+
+			int width = TexMan[tex]->GetScaledWidth();
+			int height = TexMan[tex]->GetScaledHeight();
+			FLayoutMenuItem *it = new FLayoutMenuItemGlobalSubmenuPatch(menu, desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param);
+			desc->mItems.Push(it);
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+		}
+		else if (sc.Compare("GlobalPatchCommand"))
+		{
+			sc.MustGetNumber();
+			int global = sc.Number; //global variable
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			const char *command = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FTextureID disabledTex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FName action = sc.String;
+
+
+			int comparator = 1;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				comparator = sc.Number;
+			}
+			int param = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				param = sc.Number;
+			}
+
+			int width = TexMan[tex]->GetScaledWidth();
+			int height = TexMan[tex]->GetScaledHeight();
+			FLayoutMenuItem *it = new FLayoutMenuItemGlobalCommandPatch(command, desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param);
+			desc->mItems.Push(it);
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+		}
 		/*else if (sc.Compare("PlayerDisplay"))
 		{
 			bool noportrait = false;

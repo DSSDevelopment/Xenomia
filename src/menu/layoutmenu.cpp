@@ -408,3 +408,16 @@ int FLayoutMenuItemGlobalPatch::GetWidth()
 		? TexMan[mTexture]->GetScaledWidth()
 		: 0;
 }
+
+/*FLayoutMenuItemGlobalSubmenuPatch::FLayoutMenuItemGlobalSubmenuPatch(const char *menu, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator, int param)
+	: FLayoutMenuItemGlobalPatch(x, y, width, height, hotkey, enabledPatch, disabledPatch, child, globalvar, comparator, param)
+{
+	mAction = menu;
+}
+
+FLayoutMenuItemGlobalCommandPatch::FLayoutMenuItemGlobalCommandPatch(const char *command, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator, int param)
+	: FLayoutMenuItemGlobalPatch(x, y, width, height, hotkey, enabledPatch, disabledPatch, child, globalvar, comparator, param)
+{
+	mAction = command;
+}
+*/
