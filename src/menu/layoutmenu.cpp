@@ -109,16 +109,106 @@ FLayoutMenuItem *DLayoutMenu::GetItem(FName name)
 
 bool DLayoutMenu::Responder(event_t *ev)
 {
+	//return Super::Responder(ev);
+	if (ev->type == EV_GUI_Event)
+	{
+		if (ev->subtype == EV_GUI_KeyDown)
+		{
+			int ch = tolower(ev->data1);
+
+			for (unsigned i = mDesc->mSelectedItem + 1; i < mDesc->mItems.Size(); i++)
+			{
+				if (mDesc->mItems[i]->CheckHotkey(ch))
+				{
+					mDesc->mSelectedItem = i;
+					S_Sound(CHAN_VOICE | CHAN_UI, "menu/cursor", snd_menuvolume, ATTN_NONE);
+					return true;
+				}
+			}
+			for (int i = 0; i < mDesc->mSelectedItem; i++)
+			{
+				if (mDesc->mItems[i]->CheckHotkey(ch))
+				{
+					mDesc->mSelectedItem = i;
+					S_Sound(CHAN_VOICE | CHAN_UI, "menu/cursor", snd_menuvolume, ATTN_NONE);
+					return true;
+				}
+			}
+		}
+	}
 	return Super::Responder(ev);
 }
 
 bool DLayoutMenu::MenuEvent(int mkey, bool fromcontroller)
 {
-	return Super::MenuEvent(mkey, fromcontroller);
+	//return Super::MenuEvent(mkey, fromcontroller);
+	int startedAt = mDesc->mSelectedItem;
+
+	switch (mkey)
+	{
+	case MKEY_Up:
+		do
+		{
+			if (--mDesc->mSelectedItem < 0) mDesc->mSelectedItem = mDesc->mItems.Size() - 1;
+		} while (!mDesc->mItems[mDesc->mSelectedItem]->Selectable() && mDesc->mSelectedItem != startedAt);
+		S_Sound(CHAN_VOICE | CHAN_UI, "menu/cursor", snd_menuvolume, ATTN_NONE);
+		return true;
+
+	case MKEY_Down:
+		do
+		{
+			if (++mDesc->mSelectedItem >= (int)mDesc->mItems.Size()) mDesc->mSelectedItem = 0;
+		} while (!mDesc->mItems[mDesc->mSelectedItem]->Selectable() && mDesc->mSelectedItem != startedAt);
+		S_Sound(CHAN_VOICE | CHAN_UI, "menu/cursor", snd_menuvolume, ATTN_NONE);
+		return true;
+
+	case MKEY_Enter:
+		if (mDesc->mSelectedItem >= 0 && mDesc->mItems[mDesc->mSelectedItem]->Activate())
+		{
+			S_Sound(CHAN_VOICE | CHAN_UI, "menu/choose", snd_menuvolume, ATTN_NONE);
+		}
+		return true;
+
+	default:
+		return Super::MenuEvent(mkey, fromcontroller);
+	}
 }
 
 bool DLayoutMenu::MouseEvent(int type, int x, int y)
 {
+	//return Super::MouseEvent(type, x, y);
+	int sel = -1;
+
+	// convert x/y from screen to virtual coordinates, according to CleanX/Yfac use in DrawTexture
+	x = ((x - (screen->GetWidth() / 2)) / CleanXfac) + 160;
+	y = ((y - (screen->GetHeight() / 2)) / CleanYfac) + 100;
+
+	if (mFocusControl != NULL)
+	{
+		mFocusControl->MouseEvent(type, x, y);
+		return true;
+	}
+	else
+	{
+		if ((mDesc->mWLeft <= 0 || x > mDesc->mWLeft) &&
+			(mDesc->mWRight <= 0 || x < mDesc->mWRight))
+		{
+			for (unsigned i = 0; i<mDesc->mItems.Size(); i++)
+			{
+				if (mDesc->mItems[i]->CheckCoordinate(x, y))
+				{
+					if ((int)i != mDesc->mSelectedItem)
+					{
+						//S_Sound (CHAN_VOICE | CHAN_UI, "menu/cursor", snd_menuvolume, ATTN_NONE);
+					}
+					mDesc->mSelectedItem = i;
+					mDesc->mItems[i]->MouseEvent(type, x, y);
+					return true;
+				}
+			}
+		}
+	}
+	mDesc->mSelectedItem = -1;
 	return Super::MouseEvent(type, x, y);
 }
 
@@ -365,10 +455,9 @@ int FLayoutMenuItemPatch::GetWidth()
 FLayoutMenuItemGlobalPatch::FLayoutMenuItemGlobalPatch(int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalVar, int comparator, int param)
 	: FLayoutMenuItemPatch(x, y, width, height, hotkey, enabledPatch, child, param)
 {
-	enabled = true;
+	enabled = false;
 	mTextureDisabled = disabledPatch;
 	global = globalVar;
-	idx = consoleplayer;
 	gComparator = comparator;
 }
 
@@ -376,15 +465,11 @@ void FLayoutMenuItemGlobalPatch::Ticker()
 {
 	if (global != NULL && global < 64) {
 		int x = 0;
+		idx = consoleplayer;
 		//Use the array index; assume the global is an array.
 		x = ACS_GlobalArrays[global][idx];
 		enabled = x >= gComparator;
 	}
-}
-
-bool FLayoutMenuItemGlobalPatch::CheckCoordinate(int x, int y)
-{
-	return mEnabled && y >= mYpos - mHeight && y < mYpos && x >= mXpos - mWidth / 2 && x < mXpos + mWidth / 2;	// added x check.
 }
 
 void FLayoutMenuItemGlobalPatch::Drawer(bool selected)
@@ -397,6 +482,13 @@ void FLayoutMenuItemGlobalPatch::Drawer(bool selected)
 	}
 }
 
+bool FLayoutMenuItemGlobalPatch::CheckCoordinate(int x, int y)
+{
+	return false;
+}
+
+
+
 bool FLayoutMenuItemGlobalPatch::Selectable()
 {
 	return false;
@@ -407,6 +499,16 @@ int FLayoutMenuItemGlobalPatch::GetWidth()
 	return mTexture.isValid()
 		? TexMan[mTexture]->GetScaledWidth()
 		: 0;
+}
+
+bool FLayoutMenuItemGlobalSubmenuPatch::CheckCoordinate(int x, int y)
+{
+	return enabled && y >= mYpos && y < mYpos + mHeight && x >= mXpos && x < mXpos + mWidth;	// added x check.
+}
+
+bool FLayoutMenuItemGlobalCommandPatch::CheckCoordinate(int x, int y)
+{
+	return enabled && y >= mYpos && y < mYpos + mHeight && x >= mXpos && x < mXpos + mWidth;	// added x check.
 }
 
 /*FLayoutMenuItemGlobalSubmenuPatch::FLayoutMenuItemGlobalSubmenuPatch(const char *menu, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator, int param)

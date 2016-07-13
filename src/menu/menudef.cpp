@@ -709,7 +709,7 @@ static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
 			FLayoutMenuItem *it = new FLayoutMenuItemStaticPatch(x, y, tex, false);
 			desc->mItems.Push(it);
 		}
-		else if (sc.Compare("StaticText"))
+		else if (sc.Compare("StaticText") || sc.Compare("StaticTextCentered"))
 		{
 			bool centered = sc.Compare("StaticTextCentered");
 			sc.MustGetNumber();
@@ -869,7 +869,7 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 			int height = TexMan[tex]->GetScaledHeight();
 			FLayoutMenuItem *it = new FLayoutMenuItemGlobalPatch(desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param);
 			desc->mItems.Push(it);
-			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+			//if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 		}
 		else if (sc.Compare("GlobalPatchSubmenu"))
 		{
@@ -877,7 +877,7 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 			int global = sc.Number; //global variable
 			sc.MustGetStringName(",");
 			sc.MustGetString();
-			const char *menu = sc.String;
+			FString menu = sc.String;
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
@@ -906,7 +906,7 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 			int height = TexMan[tex]->GetScaledHeight();
 			FLayoutMenuItem *it = new FLayoutMenuItemGlobalSubmenuPatch(menu, desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param);
 			desc->mItems.Push(it);
-			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+			//if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 		}
 		else if (sc.Compare("GlobalPatchCommand"))
 		{
@@ -914,7 +914,7 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 			int global = sc.Number; //global variable
 			sc.MustGetStringName(",");
 			sc.MustGetString();
-			const char *command = sc.String;
+			FString command = sc.String;
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
@@ -941,9 +941,9 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 
 			int width = TexMan[tex]->GetScaledWidth();
 			int height = TexMan[tex]->GetScaledHeight();
-			FLayoutMenuItem *it = new FLayoutMenuItemGlobalCommandPatch(command, desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param);
+			FLayoutMenuItem *it = new FLayoutMenuItemGlobalCommandPatch(command, desc->mXpos, desc->mYpos, width, height, action, tex, disabledTex, action, global, comparator, param);
 			desc->mItems.Push(it);
-			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+			//if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 		}
 		/*else if (sc.Compare("PlayerDisplay"))
 		{

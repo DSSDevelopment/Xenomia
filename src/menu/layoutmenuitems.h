@@ -207,13 +207,11 @@ protected:
 	bool enabled;
 public:
 	FLayoutMenuItemGlobalPatch(int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalVar, int comparator = 1, int param = 0);
-	bool CheckCoordinate(int x, int y);
 	void Drawer(bool selected);
 	void Ticker();
 	bool Selectable();
 	int GetWidth();
-
-
+	bool CheckCoordinate(int x, int y);
 };
 
 class FLayoutMenuItemGlobalSubmenuPatch : public FLayoutMenuItemGlobalPatch
@@ -224,6 +222,9 @@ public:
 	{
 		mAction = menu;
 	}
+
+	bool CheckCoordinate(int x, int y);
+
 
 	bool Selectable()
 	{
@@ -246,10 +247,11 @@ public:
 	{
 		mAction = command;
 	}
+	bool CheckCoordinate(int x, int y);
 
 	bool Selectable()
 	{
-		return enabled;
+		return mEnabled;
 	}
 
 	bool Activate()
