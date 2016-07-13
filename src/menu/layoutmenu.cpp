@@ -197,10 +197,12 @@ bool DLayoutMenu::MouseEvent(int type, int x, int y)
 			{
 				if (mDesc->mItems[i]->CheckCoordinate(x, y))
 				{
+					/*
 					if ((int)i != mDesc->mSelectedItem)
 					{
-						//S_Sound (CHAN_VOICE | CHAN_UI, "menu/cursor", snd_menuvolume, ATTN_NONE);
+						S_Sound (CHAN_VOICE | CHAN_UI, "menu/cursor", snd_menuvolume, ATTN_NONE);
 					}
+					*/
 					mDesc->mSelectedItem = i;
 					mDesc->mItems[i]->MouseEvent(type, x, y);
 					return true;
@@ -431,12 +433,12 @@ FLayoutMenuItemPatch::FLayoutMenuItemPatch(int x, int y, int width, int height, 
 
 void FLayoutMenuItemPatch::Drawer(bool selected)
 {
-	screen->DrawTexture(TexMan(mTexture), mXpos, mYpos, DTA_Clean, true, TAG_DONE);
+	screen->DrawTexture(TexMan(mTexture), mXpos + mWidth / 2, mYpos + mHeight, DTA_Clean, true, TAG_DONE);
 }
 
 bool FLayoutMenuItemPatch::CheckCoordinate(int x, int y)
 {
-	return mEnabled && y >= mYpos - mHeight && y < mYpos && x >= mXpos - mWidth/2 && x < mXpos + mWidth/2;	// added x check.
+	return mEnabled && y >= mYpos && y < mYpos + mHeight && x >= mXpos && x < mXpos + mWidth;	// added x check.
 }
 
 int FLayoutMenuItemPatch::GetWidth()
@@ -475,10 +477,10 @@ void FLayoutMenuItemGlobalPatch::Ticker()
 void FLayoutMenuItemGlobalPatch::Drawer(bool selected)
 {
 	if (enabled) {
-		screen->DrawTexture(TexMan(mTexture), mXpos, mYpos, DTA_Clean, true, TAG_DONE);
+		screen->DrawTexture(TexMan(mTexture), mXpos + mWidth/2, mYpos + mHeight, DTA_Clean, true, TAG_DONE);
 	}
 	else {
-		screen->DrawTexture(TexMan(mTextureDisabled), mXpos, mYpos, DTA_Clean, true, TAG_DONE);
+		screen->DrawTexture(TexMan(mTextureDisabled), mXpos + mWidth/2, mYpos + mHeight, DTA_Clean, true, TAG_DONE);
 	}
 }
 
