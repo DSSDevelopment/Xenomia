@@ -279,6 +279,11 @@ struct FActorInfo
 	TArray<const PClass *> NoHeal;
 	TArray<bool>           NoHealInherited;
 	int ScoreOnDeath;
+	int CaptureWeight;
+	int CaptureProgress;
+	int CaptureThreshold;
+	int CapturingPlayer;
+	int PossessingPlayer;
 };
 
 class FDoomEdMap

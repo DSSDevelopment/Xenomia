@@ -258,7 +258,7 @@ void FLayoutMenuItemStaticPatch::Drawer(bool selected)
 	FTexture *tex = TexMan(mTexture);
 	if (mYpos >= 0)
 	{
-		if (mCentered) x -= tex->GetScaledWidth() / 2;
+		if (mCentered) x = 160 - (tex->GetScaledWidth() / 2);
 		screen->DrawTexture(tex, x, mYpos, DTA_Clean, true, TAG_DONE);
 	}
 	else
@@ -293,7 +293,7 @@ void FLayoutMenuItemStaticText::Drawer(bool selected)
 		if (mYpos >= 0)
 		{
 			int x = mXpos;
-			if (mCentered) x -= mFont->StringWidth(text) / 2;
+			if (mCentered) x = 160 - (mFont->StringWidth(text) / 2);
 			screen->DrawText(mFont, mColor, x, mYpos, text, DTA_Clean, true, TAG_DONE);
 		}
 		else

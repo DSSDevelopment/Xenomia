@@ -5719,3 +5719,198 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FilterVisibility)
 	ACTION_PARAM_INT(visiblefilter, 0);
 	self->VisibleFilter = visiblefilter;
 }
+
+//==========================================================================
+//
+// A_CheckCapture
+//
+// Uses code roughly similar to A_Explode (but without all the compatibility
+// baggage and damage computation code to give an item to all eligible mobjs
+// in range.
+//
+//==========================================================================
+enum CheckCaptureFlags
+{
+	CCF_TEAMONLY = 1 << 0,
+	CCF_CUBE = 1 << 1
+};
+
+DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
+{
+	ACTION_PARAM_START(3);
+	ACTION_PARAM_INT(flags, 128);
+	ACTION_PARAM_STATE(jumpto, 1);
+	ACTION_PARAM_FIXED(distance, 0);
+
+	ACTION_SET_RESULT(false);	// Jumps should never set the result for inventory state chains!
+
+	FBlockThingsIterator it(FBoundingBox(self->x, self->y, distance));
+	double distsquared = double(distance) * double(distance);
+
+	//The array of totals.
+	int totals[8];
+	for (int i = 0; i < 8; i++)
+	{
+		totals[i] = 0;
+	}
+
+	AActor *thing;
+	while (thing = it.Next())
+	{
+		// Don't count inventory items
+		if (thing->flags & MF_SPECIAL)
+		{
+			continue;
+		}
+
+		// Avoid counting self
+		if (thing == self)
+		{
+			continue;
+		}
+		
+		// Don't count the dead
+		if (thing->flags & MF_CORPSE)
+		{
+			continue;
+		}
+		else if (thing->health <= 0 || thing->flags6 & MF6_KILLED)
+		{
+			continue;
+		}
+		// Players, monsters, and other shootable objects
+		if (!(thing->player) && !(thing->flags3 & MF3_ISMONSTER))
+		{
+			continue;
+		}
+
+		if (flags & CCF_CUBE)
+		{ // check if inside a cube
+			if (abs(thing->x - self->x) > distance ||
+				abs(thing->y - self->y) > distance ||
+				abs((thing->z + thing->height / 2) - (self->z + self->height / 2)) > distance)
+			{
+				continue;
+			}
+		}
+		else
+		{ // check if inside a sphere
+			TVector3<double> tpos(thing->x, thing->y, thing->z + thing->height / 2);
+			TVector3<double> spos(self->x, self->y, self->z + self->height / 2);
+			if ((tpos - spos).LengthSquared() > distsquared)
+			{
+				continue;
+			}
+		}
+		fixed_t dz = abs((thing->z + thing->height / 2) - (self->z + self->height / 2));
+
+		if (P_CheckSight(thing, self, SF_IGNOREVISIBILITY | SF_IGNOREWATERBOUNDARY))
+		{ 
+			if (thing->player)
+			{
+				totals[int(thing->player - players)] += thing->CaptureWeight;
+			}
+			else
+			{
+				if (thing->master->player)
+				{
+					totals[int(thing->master->player - players)] += thing->CaptureWeight;
+				}
+			}
+		}
+	}
+
+	//totals array is finalized; Do our calculations.
+	int previousCaptureProgress = self->CaptureProgress;
+	int largest = 0;
+	int winner;
+	bool statusChanged = false;
+	for (int i = 0; i < 8; i++)
+	{
+		int j = totals[i];
+		if (j > largest)
+		{
+			largest = j;
+			winner = i;
+		}
+		else if (j == largest) //tie: we can quit now
+		{
+			return;
+		}
+	}
+	//see if we have an owner.
+	int owner = self->PossessingPlayer;
+	int currentCaptor = self->CapturingPlayer;
+	bool ownershipChanged = false;
+	if (owner < 0) { //Point is unowned.
+		//is there a capturing player?
+		if (self->CapturingPlayer > -1)
+		{
+			//If yes, is the winner the capturing player?
+			if (currentCaptor == winner)
+			{
+				//If yes, increment capture progress.
+				self->CaptureProgress += totals[winner];
+				//If progress >= threshold, set owner and make progress equal to threshold.
+				if (self->CaptureProgress >= self->CaptureThreshold)
+				{
+					self->PossessingPlayer = winner;
+					self->CapturingPlayer = -1;
+					self->CaptureProgress = self->CaptureThreshold;
+					ownershipChanged = true;
+				}
+			}
+			else 
+			{
+				//If not, decrement capture progress - point is being decapped.
+				self->CaptureProgress -= totals[winner];
+				//If capture progress crosses zero, points is now unowned. The next call to A_CheckCapture will begin capture.
+				if (self->CaptureProgress <= 0)
+				{
+					self->PossessingPlayer = -1;
+					self->CapturingPlayer = -1;
+					self->CaptureProgress = 0;
+					ownershipChanged = true;
+				}
+			}
+		}
+		else 
+		{
+			//If not, increment capture progress and set capturing player.
+			self->CaptureProgress += totals[winner];
+			self->CapturingPlayer = winner;
+		}
+			
+	}
+	else if (owner >= 0 && owner < sizeof(players)) //Point is owned.
+	{
+		//Is the winner our owning player already?
+		if (winner == owner)
+		{
+			//If yes, is the capture progress below the capture threshold (point has been decapped a bit)?
+			if (self->CaptureProgress < self->CaptureThreshold)
+			{
+				//If yes, increase capture progress.
+				self->CaptureProgress += totals[winner];
+			}
+		}
+		else 
+		{
+			//If not, reduce capture progress.
+			self->CaptureProgress -= totals[winner];
+			//If capture progress passes below zero, point is now unowned. The next call to A_CheckCapture will begin capture.
+			if (self->CaptureProgress <= 0)
+			{
+				self->CapturingPlayer = -1;
+				self->PossessingPlayer = -1;
+				self->CaptureProgress = 0;
+				ownershipChanged = true;
+			}	  
+		}
+	}
+
+	if (ownershipChanged)
+	{
+		ACTION_JUMP(jumpto);
+	}
+}

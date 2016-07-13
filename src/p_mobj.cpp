@@ -307,7 +307,12 @@ void AActor::Serialize (FArchive &arc)
 		<< VisibleFilter // [fdari]
 		<< pushfactor
 		<< Species
-		<< Score;
+		<< Score
+		<< CaptureWeight //[DS]
+		<< CaptureProgress
+		<< CaptureThreshold
+		<< CapturingPlayer
+		<< PossessingPlayer;
 	if (SaveVersion >= 3113)
 	{
 		arc << DesignatedTeam;

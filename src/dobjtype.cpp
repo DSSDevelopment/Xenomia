@@ -339,6 +339,11 @@ PClass *PClass::CreateDerivedClass (FName name, unsigned int size)
 		info->PainFlashes = NULL;
 		info->ColorSets = NULL;
 		info->ScoreOnDeath = 0;
+		info->CaptureWeight = 0;
+		info->CaptureProgress = 0;
+		info->CaptureThreshold = 0;
+		info->CapturingPlayer = -1;
+		info->PossessingPlayer = -1;
 		m_RuntimeActors.Push (type);
 	}
 	return type;
@@ -435,6 +440,11 @@ void PClass::InitializeActorInfo ()
 	info->PainFlashes = NULL;
 	info->ColorSets = NULL;
 	info->ScoreOnDeath = 0;
+	info->CaptureWeight = 0;
+	info->CaptureThreshold = 0;
+	info->CaptureProgress = 0;
+	info->CapturingPlayer = -1;
+	info->PossessingPlayer = -1;
 	m_RuntimeActors.Push (this);
 }
 

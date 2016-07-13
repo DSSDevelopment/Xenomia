@@ -1011,6 +1011,13 @@ public:
 	fixed_t PrevX, PrevY, PrevZ;
 	angle_t PrevAngle;
 
+	// [DS] Xenomia capture point logic
+	int CaptureWeight;
+	int CaptureThreshold;
+	int CaptureProgress;
+	int CapturingPlayer;
+	int PossessingPlayer;
+
 	// ThingIDs
 	static void ClearTIDHashes ();
 	void AddToHash ();

@@ -696,7 +696,7 @@ static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
 		}
 		else if (sc.Compare("StaticPatch"))
 		{
-			//bool centered = sc.Compare("StaticPatchCentered");
+			bool centered = sc.Compare("StaticPatchCentered");
 			sc.MustGetNumber();
 			int x = sc.Number;
 			sc.MustGetStringName(",");
@@ -706,7 +706,7 @@ static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
 			sc.MustGetString();
 			FTextureID tex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
 
-			FLayoutMenuItem *it = new FLayoutMenuItemStaticPatch(x, y, tex, false);
+			FLayoutMenuItem *it = new FLayoutMenuItemStaticPatch(x, y, tex, centered);
 			desc->mItems.Push(it);
 		}
 		else if (sc.Compare("StaticText") || sc.Compare("StaticTextCentered"))
@@ -719,7 +719,7 @@ static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
 			int y = sc.Number;
 			sc.MustGetStringName(",");
 			sc.MustGetString();
-			FLayoutMenuItem *it = new FLayoutMenuItemStaticText(x, y, sc.String, desc->mFont, desc->mFontColor, false);
+			FLayoutMenuItem *it = new FLayoutMenuItemStaticText(x, y, sc.String, desc->mFont, desc->mFontColor, centered);
 			desc->mItems.Push(it);
 		}
 		else if (sc.Compare("PatchItem"))

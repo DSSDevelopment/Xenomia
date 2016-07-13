@@ -1473,6 +1473,39 @@ DEFINE_PROPERTY(visiblefilter, I, Actor)
 }
 
 //==========================================================================
+// [DS]
+//==========================================================================
+DEFINE_PROPERTY(CaptureWeight, I, Actor)
+{
+	PROP_INT_PARM(i, 0);
+	defaults->CaptureWeight = i;
+}
+
+DEFINE_PROPERTY(CaptureProgress, I, Actor)
+{
+	PROP_INT_PARM(i, 0);
+	defaults->CaptureProgress = i;
+}
+
+DEFINE_PROPERTY(CaptureThreshold, I, Actor)
+{
+	PROP_INT_PARM(i, 0);
+	defaults->CaptureThreshold = i;
+}
+
+DEFINE_PROPERTY(CapturingPlayer, I, Actor)
+{
+	PROP_INT_PARM(i, 0);
+	defaults->CapturingPlayer = i;
+}
+
+DEFINE_PROPERTY(PossessingPlayer, I, Actor)
+{
+	PROP_INT_PARM(i, 0);
+	defaults->PossessingPlayer = i;
+}
+
+//==========================================================================
 //
 // Special inventory properties
 //

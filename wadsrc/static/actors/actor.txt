@@ -339,6 +339,9 @@ ACTOR Actor native //: Thinker
 	action native A_ClearUserPSprite(int layer = 1);
 	action native A_FilterVisibility(int ptr_bitmask);
 
+	//XENOMIA
+	action native A_CheckCapture(int distance, int amount);
+
 	action native ACS_NamedExecute(string script, int mapnum=0, int arg1=0, int arg2=0, int arg3=0);
 	action native ACS_NamedSuspend(string script, int mapnum=0);
 	action native ACS_NamedTerminate(string script, int mapnum=0);
