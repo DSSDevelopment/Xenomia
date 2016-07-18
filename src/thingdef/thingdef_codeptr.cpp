@@ -5819,6 +5819,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 			}
 		}
 	}
+	//see if we have an owner.
+	int owner = self->PossessingPlayer;
+	int currentCaptor = self->CapturingPlayer;
 
 	//totals array is finalized; Do our calculations.
 	int previousCaptureProgress = self->CaptureProgress;
@@ -5830,8 +5833,19 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 		int j = totals[i];
 		if (largest > 0 && j > 0)
 		{
-			//There is more than one faction contesting the point. We can quit now.
-			return;
+			//Don't let teammates prevent each other's capture in progress, but first-come, first served.
+			if ( (players[i].userinfo.GetTeam() == players[winner].userinfo.GetTeam()) )
+			{
+				if (currentCaptor > -1)
+				{
+					winner = currentCaptor;
+					largest = totals[winner];
+				}
+				break;
+			}
+			else {
+				return;
+			}
 		}
 		if (j > largest)
 		{
@@ -5839,12 +5853,10 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 			winner = i;
 		}
 	}
-	//see if we have an owner.
-	int owner = self->PossessingPlayer;
-	int currentCaptor = self->CapturingPlayer;
+	
 	bool ownershipChanged = false;
 	if (owner < 0) { //Point is unowned.
-		if (largest == 0) //No one is capturing the point.
+		if (largest <= 0) //No one is capturing the point.
 		{
 			if (self->CaptureProgress > 0) //Decay capture progress a bit.
 			{
@@ -5877,7 +5889,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 			{
 				//If not, decrement capture progress - point is being decapped.
 				self->CaptureProgress -= totals[winner];
-				//If capture progress crosses zero, points is now unowned. The next call to A_CheckCapture will begin capture.
+				//If capture progress crosses zero, point is now unowned. The next call to A_CheckCapture will begin capture.
 				if (self->CaptureProgress <= 0)
 				{
 					self->PossessingPlayer = -1;
@@ -5897,7 +5909,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 	}
 	else if (owner >= 0 && owner < sizeof(players)) //Point is owned.
 	{
-		if (largest == 0) //No one is capturing the point.
+		if (largest <= 0) //No one is capturing the point.
 		{
 			if (self->CaptureProgress < self->CaptureThreshold) //Decay decap progress a bit.
 			{
@@ -5910,8 +5922,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 			}
 			return;
 		}
-		//Is the winner our owning player already?
-		if (winner == owner)
+		//Is the winner our owning player or a teammate?
+		if ( winner == owner || players[winner].userinfo.GetTeam() == players[owner].userinfo.GetTeam() )
 		{
 			//If yes, is the capture progress below the capture threshold (point has been decapped a bit)?
 			if (self->CaptureProgress < self->CaptureThreshold)

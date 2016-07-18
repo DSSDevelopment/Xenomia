@@ -2184,6 +2184,13 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 		actor->target = NULL;
 	}
 
+	// [DS] If our target has become +NEVERTARGET, stop targeting it.
+	if (actor->target != NULL &&
+		actor->target->flags7 & MF7_NEVERTARGET)
+	{
+		actor->target = NULL;
+	}
+
 	// modify target threshold
 	if (actor->threshold)
 	{
