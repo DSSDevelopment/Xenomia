@@ -3694,6 +3694,10 @@ enum
 	APROP_MaxDropOffHeight,
 	APROP_VisibleFilter,
 	APROP_FilterHides,
+	APROP_PossessingPlayer,
+	APROP_CapturingPlayer,
+	APROP_CaptureProgress,
+	APROP_CaptureThreshold
 };
 
 // These are needed for ACS's APROP_RenderStyle
@@ -3967,6 +3971,18 @@ void DLevelScript::DoSetActorProperty (AActor *actor, int property, int value)
 			actor->flags7 &= ~MF7_FILTERHIDES;
 		}
 		break;
+	case APROP_PossessingPlayer:
+		actor->PossessingPlayer = value;
+		break;
+	case APROP_CapturingPlayer:
+		actor->CapturingPlayer = value;
+		break;
+	case APROP_CaptureProgress:
+		actor->CaptureProgress = value;
+		break;
+	case APROP_CaptureThreshold:
+		actor->CaptureThreshold = value;
+		break;
 
 	default:
 		// do nothing.
@@ -4072,6 +4088,10 @@ int DLevelScript::GetActorProperty (int tid, int property, const SDWORD *stack, 
 	case APROP_MaxDropOffHeight: return actor->MaxDropOffHeight;
 	case APROP_VisibleFilter: return actor->VisibleFilter;
 	case APROP_FilterHides: return !!(actor->flags7 & MF7_FILTERHIDES);
+	case APROP_PossessingPlayer: return actor->PossessingPlayer;
+	case APROP_CapturingPlayer: return actor->CapturingPlayer;
+	case APROP_CaptureProgress: return actor->CaptureProgress;
+	case APROP_CaptureThreshold: return actor->CaptureThreshold;
 
 	default:				return 0;
 	}
@@ -4122,6 +4142,10 @@ int DLevelScript::CheckActorProperty (int tid, int property, int value)
 		case APROP_MaxStepHeight:
 		case APROP_MaxDropOffHeight:
 		case APROP_VisibleFilter:
+		case APROP_PossessingPlayer:
+		case APROP_CapturingPlayer:
+		case APROP_CaptureProgress:
+		case APROP_CaptureThreshold:
 			return (GetActorProperty(tid, property, NULL, 0) == value);
 
 		// Boolean values need to compare to a binary version of value
@@ -6386,7 +6410,21 @@ doplaysound:			if (funcIndex == ACSF_PlayActorSound)
 			strcpy(result, cmd);
 			strcat(result, menu);
 
-			C_DoCommand(result);
+			AActor *screen = activator;
+			// If a missile is the activator, make the thing that
+			// launched the missile the target of the OpenMenu command.
+			if (screen != NULL &&
+				screen->player == NULL &&
+				(screen->flags & MF_MISSILE) &&
+				screen->target != NULL)
+			{
+				screen = screen->target;
+			}
+			if (screen == NULL || screen->CheckLocalView(consoleplayer))
+			{
+				C_DoCommand(result);
+				//C_MidPrint(activefont, work);
+			}
 			break;
 		}
 

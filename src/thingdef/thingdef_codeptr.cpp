@@ -5725,8 +5725,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_FilterVisibility)
 // A_CheckCapture
 //
 // Uses code roughly similar to A_Explode (but without all the compatibility
-// baggage and damage computation code to give an item to all eligible mobjs
-// in range.
+// baggage and damage computation code) to check the status of a capture point
+// using nearby mobjs' CaptureWeight property.
 //
 //==========================================================================
 enum CheckCaptureFlags
@@ -5738,9 +5738,9 @@ enum CheckCaptureFlags
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 {
 	ACTION_PARAM_START(3);
-	ACTION_PARAM_INT(flags, 128);
-	ACTION_PARAM_STATE(jumpto, 1);
 	ACTION_PARAM_FIXED(distance, 0);
+	ACTION_PARAM_STATE(jumpto, 1);
+	ACTION_PARAM_INT(flags, 2);
 
 	ACTION_SET_RESULT(false);	// Jumps should never set the result for inventory state chains!
 
@@ -5823,19 +5823,20 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 	//totals array is finalized; Do our calculations.
 	int previousCaptureProgress = self->CaptureProgress;
 	int largest = 0;
-	int winner;
+	int winner = 0;
 	bool statusChanged = false;
 	for (int i = 0; i < 8; i++)
 	{
 		int j = totals[i];
+		if (largest > 0 && j > 0)
+		{
+			//There is more than one faction contesting the point. We can quit now.
+			return;
+		}
 		if (j > largest)
 		{
 			largest = j;
 			winner = i;
-		}
-		else if (j == largest) //tie: we can quit now
-		{
-			return;
 		}
 	}
 	//see if we have an owner.
@@ -5843,6 +5844,18 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 	int currentCaptor = self->CapturingPlayer;
 	bool ownershipChanged = false;
 	if (owner < 0) { //Point is unowned.
+		if (largest == 0) //No one is capturing the point.
+		{
+			if (self->CaptureProgress > 0) //Decay capture progress a bit.
+			{
+				self->CaptureProgress -= 8;
+				if (self->CaptureProgress < 0)
+				{
+					self->CaptureProgress = 0;
+				}
+			}
+			return;
+		}
 		//is there a capturing player?
 		if (self->CapturingPlayer > -1)
 		{
@@ -5884,6 +5897,19 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 	}
 	else if (owner >= 0 && owner < sizeof(players)) //Point is owned.
 	{
+		if (largest == 0) //No one is capturing the point.
+		{
+			if (self->CaptureProgress < self->CaptureThreshold) //Decay decap progress a bit.
+			{
+				self->CaptureProgress += 8;
+				if (self->CaptureProgress > self->CaptureThreshold)
+				{
+					self->CapturingPlayer = -1;
+					self->CaptureProgress = self->CaptureThreshold;
+				}
+			}
+			return;
+		}
 		//Is the winner our owning player already?
 		if (winner == owner)
 		{
@@ -5892,12 +5918,18 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 			{
 				//If yes, increase capture progress.
 				self->CaptureProgress += totals[winner];
+				if (self->CaptureProgress > self->CaptureThreshold)
+				{
+					self->CapturingPlayer = -1;
+					self->CaptureProgress = self->CaptureThreshold;
+				}
 			}
 		}
 		else 
 		{
 			//If not, reduce capture progress.
 			self->CaptureProgress -= totals[winner];
+			self->CapturingPlayer = winner;
 			//If capture progress passes below zero, point is now unowned. The next call to A_CheckCapture will begin capture.
 			if (self->CaptureProgress <= 0)
 			{
