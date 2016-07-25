@@ -5812,7 +5812,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 			}
 			else
 			{
-				if (thing->master->player)
+				if (thing->master != NULL && thing->master->player)
 				{
 					totals[int(thing->master->player - players)] += thing->CaptureWeight;
 				}
@@ -5858,12 +5858,14 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 	if (owner < 0) { //Point is unowned.
 		if (largest <= 0) //No one is capturing the point.
 		{
-			if (self->CaptureProgress > 0) //Decay capture progress a bit.
+			if (self->CaptureProgress > 0 || self->CapturingPlayer > -1) //Decay capture progress a bit.
 			{
 				self->CaptureProgress -= 8;
 				if (self->CaptureProgress < 0)
 				{
 					self->CaptureProgress = 0;
+					self->CapturingPlayer = -1;
+					ACTION_JUMP(jumpto);
 				}
 			}
 			return;
@@ -5951,6 +5953,16 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 				ownershipChanged = true;
 			}	  
 		}
+	}
+
+	if (self->CaptureProgress < 0)
+	{
+		self->CaptureProgress = 0;
+	}
+
+	if (self->CaptureProgress > self->CaptureThreshold)
+	{
+		self->CaptureProgress = self->CaptureThreshold;
 	}
 
 	if (ownershipChanged)

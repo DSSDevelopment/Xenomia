@@ -394,6 +394,11 @@ FLayoutMenuItemText::~FLayoutMenuItemText()
 	}
 }
 
+bool FLayoutMenuItemText::CheckCoordinate(int x, int y)
+{
+	return mEnabled && y >= mYpos && y < mYpos + mHeight && x >= mXpos && x < mXpos + mWidth;	// added x check.
+}
+
 void FLayoutMenuItemText::Drawer(bool selected)
 {
 	const char *text = mText;
@@ -447,6 +452,117 @@ int FLayoutMenuItemPatch::GetWidth()
 		? TexMan[mTexture]->GetScaledWidth()
 		: 0;
 }
+
+	FLayoutMenuItemGlobalSwitchText::FLayoutMenuItemGlobalSwitchText(int x, int y, int hotkey, const char *text, const char *disabledText, const char *lockedText, FFont *font, EColorRange color, EColorRange color2, FName action, int globalVar, int indexOffset, int switchGlobal, int switchComparator, int param)
+		: FLayoutMenuItemGlobalText(x, y, hotkey, text, disabledText, font, color, color2, action, globalVar, indexOffset, param)
+	{
+		mLockedText = ncopystring(lockedText);
+		mText = ncopystring(text);
+		mDisabledText = ncopystring(disabledText);
+		mSwitchComparator = switchComparator;
+		mSwitchGlobal = switchGlobal;
+		locked = true;
+	}
+
+	void FLayoutMenuItemGlobalSwitchText::Ticker()
+	{
+		//Locked takes precedence over enabled.
+		if (mSwitchGlobal != NULL && mSwitchGlobal < 64)
+		{
+			idx = consoleplayer;
+			int i = ACS_GlobalArrays[mSwitchGlobal][idx];
+			locked = i < mSwitchComparator;
+			if (!locked && global != NULL && global < 64) {
+				int x = 0;
+				idx = (consoleplayer * 24) + gComparator; //Horrible magic number defined in Xenomia's global ACS as kUnitsPerFaction
+				enabled = ACS_GlobalArrays[global][idx] <= 0; 				//Use the array index; assume the global is an array.
+			}
+		}
+	}
+
+	void FLayoutMenuItemGlobalSwitchText::Drawer(bool selected)
+	{
+		const char *text = mText;
+		const char *disabledText = mDisabledText;
+		const char *lockedText = mLockedText;
+		if (locked && lockedText != NULL)
+		{
+			//if (*lockedText == '$') lockedText = GStrings(lockedText + 1);
+			screen->DrawText(mFont, selected ? mColorSelected : mColor, mXpos, mYpos, mLockedText, DTA_Clean, true, TAG_DONE);
+		}
+		else 
+		{
+			if (enabled && text != NULL)
+			{
+				if (*text == '$') text = GStrings(text + 1);
+				screen->DrawText(mFont, selected ? mColorSelected : mColor, mXpos, mYpos, mText, DTA_Clean, true, TAG_DONE);
+			}
+			else if (!enabled && disabledText != NULL)
+			{
+				//if (*disabledText == '$') disabledText = GStrings(disabledText + 1);
+				screen->DrawText(mFont, selected ? mColorSelected : mColor, mXpos, mYpos, mDisabledText, DTA_Clean, true, TAG_DONE);
+			}
+		}
+}
+
+	FLayoutMenuItemGlobalText::FLayoutMenuItemGlobalText(int x, int y, int hotkey, const char *text, const char *disabledText, FFont *font, EColorRange color, EColorRange color2, FName action, int globalVar, int indexOffset, int param)
+		: FLayoutMenuItemText(x, y, hotkey, text, font, color, color2, action, param)
+	{
+		mDisabledText = ncopystring(disabledText);
+		mText = ncopystring(text);
+		enabled = false;
+		global = globalVar;
+		gComparator = indexOffset;
+		mAction = action;
+	}
+
+	void FLayoutMenuItemGlobalText::Ticker()
+	{
+		if (global != NULL && global < 64) {
+			int x = 0;
+			idx = (consoleplayer * 24) + gComparator; //Horrible magic number defined in Xenomia's global ACS as kUnitsPerFaction
+			//Use the array index; assume the global is an array.
+			enabled = ACS_GlobalArrays[global][idx] <= 0;
+		}
+	}
+
+
+	void FLayoutMenuItemGlobalText::Drawer(bool selected)
+	{
+		const char *text = mText;
+		const char *disabledText = mDisabledText;
+		if (enabled && text != NULL)
+		{
+			if (*text == '$') text = GStrings(text + 1);
+			screen->DrawText(mFont, selected ? mColorSelected : mColor, mXpos, mYpos, mText, DTA_Clean, true, TAG_DONE);
+		}
+		else if (!enabled && disabledText != NULL)
+		{
+			//if (*disabledText == '$') disabledText = GStrings(disabledText + 1);
+			screen->DrawText(mFont, selected ? mColorSelected : mColor, mXpos, mYpos, mDisabledText, DTA_Clean, true, TAG_DONE);
+		}
+	}
+
+	int FLayoutMenuItemGlobalText::GetWidth()
+	{
+		const char *text = mText;
+		if (text != NULL)
+		{
+			if (*text == '$') text = GStrings(text + 1);
+			return mFont->StringWidth(text);
+		}
+		return 1;
+	}
+
+	bool FLayoutMenuItemGlobalText::CheckCoordinate(int x, int y)
+	{
+		return enabled && y >= mYpos && y < mYpos + mHeight && x >= mXpos && x < mXpos + mWidth;	// added x check.
+	}
+
+	bool FLayoutMenuItemGlobalText::Selectable()
+	{
+		return enabled;
+	}
 
 //=============================================================================
 //

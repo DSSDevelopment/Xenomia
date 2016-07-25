@@ -766,6 +766,80 @@ desc->mItems.Push(it);
 if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 
 		}
+		else if (sc.Compare("GlobalTextCommand"))
+		{
+			sc.MustGetString();
+			FString text = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FString disabledText = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			int hotkey = sc.String[0];
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FName action = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int global = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int comparator = sc.Number;
+
+			int param = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				param = sc.Number;
+			}
+
+			FLayoutMenuItem *it = new FLayoutMenuItemGlobalText(desc->mXpos, desc->mYpos, hotkey, text, disabledText, desc->mFont, desc->mFontColor, desc->mFontColor2, action, global, comparator, param);
+			desc->mItems.Push(it);
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+
+		}
+		else if (sc.Compare("GlobalTextSwitchCommand"))
+		{
+			sc.MustGetString();
+			FString text = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FString disabledText = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FString lockedText = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			int hotkey = sc.String[0];
+			sc.MustGetStringName(",");
+			sc.MustGetString();
+			FName action = sc.String;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int global = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int comparator = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int switchGlobal = sc.Number;
+			sc.MustGetStringName(",");
+			sc.MustGetNumber();
+			int switchComparator = sc.Number;
+
+
+			int param = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				param = sc.Number;
+			}
+
+			FLayoutMenuItem *it = new FLayoutMenuItemGlobalSwitchText(desc->mXpos, desc->mYpos, hotkey, text, disabledText, lockedText, desc->mFont, desc->mFontColor, desc->mFontColor2, action, global, comparator, switchGlobal, switchComparator, param);
+			desc->mItems.Push(it);
+			if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
+
+		}
 		else if (sc.Compare("Font"))
 		{
 			sc.MustGetString();

@@ -169,6 +169,7 @@ public:
 
 class FLayoutMenuItemText : public FLayoutMenuItemSelectable
 {
+protected:
 	const char *mText;
 	FFont *mFont;
 	EColorRange mColor;
@@ -176,6 +177,7 @@ class FLayoutMenuItemText : public FLayoutMenuItemSelectable
 public:
 	FLayoutMenuItemText(int x, int y, int hotkey, const char *text, FFont *font, EColorRange color, EColorRange color2, FName child, int param = 0);
 	~FLayoutMenuItemText();
+	bool CheckCoordinate(int x, int y);
 	void Drawer(bool selected);
 	int GetWidth();
 };
@@ -189,6 +191,45 @@ public:
 	bool CheckCoordinate(int x, int y);
 	void Drawer(bool selected);
 	int GetWidth();
+};
+
+
+class FLayoutMenuItemGlobalText : public FLayoutMenuItemText
+{
+protected:
+	bool enabled;
+	int global;		// The index of an ACS Global Variable.
+	int idx;		// The index of the array within that global (optional).
+	int gComparator; // The offset within the ACS global array that has to be > 0 for this item to be enabled. Calculated by multiplying by consoleplayer.
+	const char *mDisabledText;
+public:
+	FLayoutMenuItemGlobalText(int x, int y, int hotkey, const char *text, const char *disabledText, FFont *font, EColorRange color, EColorRange color2, FName action, int globalVar, int indexOffset, int param = 0);
+	//~FLayoutMenuItemGlobalText();
+	bool CheckCoordinate(int x, int y);
+	void Drawer(bool selected);
+	void Ticker();
+	bool Selectable();
+	int GetWidth();
+
+	bool Activate()
+	{
+		S_Sound(CHAN_VOICE | CHAN_UI, "menu/choose", snd_menuvolume, ATTN_NONE);
+		C_DoCommand(mAction);
+		return true;
+	}
+};
+
+class FLayoutMenuItemGlobalSwitchText : public FLayoutMenuItemGlobalText
+{
+	int mSwitchGlobal;
+	int mSwitchComparator;
+	bool locked;
+	const char *mLockedText;
+public:
+	FLayoutMenuItemGlobalSwitchText(int x, int y, int hotkey, const char *text, const char *disabledText, const char *lockedText, FFont *font, EColorRange color, EColorRange color2, FName action, int globalVar, int indexOffset, int switchGlobal, int switchComparator, int param = 0);
+	void Ticker();
+	void Drawer(bool selected);
+	//bool CheckCoordinate(int x, int y);
 };
 
 

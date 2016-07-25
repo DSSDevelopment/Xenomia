@@ -39,17 +39,17 @@ const char *GetVersionString();
 
 /** Lots of different version numbers **/
 
-#define VERSIONSTR "1.8.10"
+#define VERSIONSTR "1.8.11"
 
 // The version as seen in the Windows resource
-#define RC_FILEVERSION 1,8,10,0
-#define RC_PRODUCTVERSION 1,8,10,0
-#define RC_PRODUCTVERSION2 "1.8.10"
+#define RC_FILEVERSION 1,8,11,0
+#define RC_PRODUCTVERSION 1,8,11,0
+#define RC_PRODUCTVERSION2 "1.8.11"
 
 // Version identifier for network games.
 // Bump it every time you do a release unless you're certain you
 // didn't change anything that will affect sync.
-#define NETGAMEVERSION 231
+#define NETGAMEVERSION 232
 
 // Version stored in the ini's [LastRun] section.
 // Bump it if you made some configuration change that you want to
@@ -84,8 +84,8 @@ const char *GetVersionString();
 #define DYNLIGHT
 
 // More stuff that needs to be different for derivatives.
-#define GAMENAME "GLOOME"
-#define GAMENAMELOWERCASE "gloome"
+#define GAMENAME "XENOMIA"
+#define GAMENAMELOWERCASE "xenomia"
 #define FORUM_URL "http://forum.drdteam.org"
 #define BUGS_FORUM_URL	"http://forum.drdteam.org/viewforum.php?f=24"
 
