@@ -213,12 +213,10 @@ bool AAPTR_FILTER(AActor *context, AActor *target, int aaptr_filter)
 		
 		if(context != NULL)
 		{
-			if(	((aaptr_filter & AAPTR_TARGET) && context->target == target)
-				||	((aaptr_filter & AAPTR_TRACER) && context->tracer == target)
-				||	((aaptr_filter & AAPTR_FRIENDPLAYER) && context->FriendPlayer && AAPTR_RESOLVE_PLAYERNUM(context->FriendPlayer-1) == target))
-			{
-				return true;
-			}
+			if ((aaptr_filter & AAPTR_TARGET) && context->target == target) return true;
+			if ((aaptr_filter & AAPTR_MASTER) && context->master == target) return true;
+			if ((aaptr_filter & AAPTR_TRACER) && context->tracer == target) return true;
+			if ((aaptr_filter & AAPTR_FRIENDPLAYER) && context->FriendPlayer && AAPTR_RESOLVE_PLAYERNUM(context->FriendPlayer - 1) == target) return true;
 			
 			if(context->player != NULL)
 			{
