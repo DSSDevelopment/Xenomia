@@ -147,6 +147,7 @@ bool DTextEnterMenu::Responder(event_t *ev)
 				}
 			}
 		}
+
 		if (ev->subtype == EV_GUI_KeyDown || ev->subtype == EV_GUI_KeyRepeat)
 		{
 			return true;

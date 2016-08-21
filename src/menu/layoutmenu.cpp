@@ -70,6 +70,10 @@ void DLayoutMenu::Init(DMenu *parent, FLayoutMenuDescriptor *desc)
 	mParentMenu = parent;
 	GC::WriteBarrier(this, parent);
 	mDesc = desc;
+	if (desc->holdScancode > 0)
+	{
+		mHoldScancode = desc->holdScancode;
+	}
 	if (desc->mCenter)
 	{
 		int center = 160;
@@ -133,6 +137,17 @@ bool DLayoutMenu::Responder(event_t *ev)
 					S_Sound(CHAN_VOICE | CHAN_UI, "menu/cursor", snd_menuvolume, ATTN_NONE);
 					return true;
 				}
+			}
+		}
+		else if (ev->subtype == EV_GUI_KeyUp && mHoldScancode > 0)
+		{
+			if (ev->data1 == mHoldScancode)
+			{
+				//test closing menus when keys are up
+				DMenu *parent = mParentMenu;
+				Close();
+				//parent->MenuEvent(MKEY_Abort, false);
+				return true;
 			}
 		}
 	}

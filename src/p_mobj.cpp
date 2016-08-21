@@ -4432,6 +4432,25 @@ APlayerPawn *P_SpawnPlayer (FPlayerStart *mthing, int playernum, int flags)
 		P_FindFloorCeiling(mobj, FFCF_SAMESECTOR | FFCF_ONLY3DFLOORS | FFCF_3DRESTRICT);
 	}
 
+	if (!(mobj->flags2 & MF2_DONTTRANSLATE))
+	{
+		// [DSS] Support for using translation numbers in TEAMINFO
+		if (!teamplay) {
+			// [RH] Be sure the player has the right translation
+			R_BuildPlayerTranslation(playernum);
+
+			// [RH] set color translations for player sprites
+			mobj->Translation = TRANSLATION(TRANSLATION_Players, playernum);
+		}
+		else {
+			int team;
+			userinfo_t *info = &players[playernum].userinfo;
+			if (teamplay && TeamLibrary.IsValidTeam((team = info->GetTeam())) && !Teams[team].GetAllowCustomPlayerColor()) {
+				int translation = TRANSLATION(TRANSLATION_LevelScripted, (Teams[team].GetPlayerTranslation() - 1));
+				mobj->Translation = translation;
+			}
+		}
+
 	mobj->FriendPlayer = playernum + 1;	// [RH] players are their own friends
 	oldactor = p->mo;
 	p->mo = mobj;
@@ -4450,24 +4469,6 @@ APlayerPawn *P_SpawnPlayer (FPlayerStart *mthing, int playernum, int flags)
 
 	// [GRB] Reset skin
 	p->userinfo.SkinNumChanged(R_FindSkin (skins[p->userinfo.GetSkin()].name, p->CurrentPlayerClass));
-
-	if (!(mobj->flags2 & MF2_DONTTRANSLATE))
-	{
-		// [DSS] Support for using translation numbers in TEAMINFO
-		if (!teamplay) {
-			// [RH] Be sure the player has the right translation
-			R_BuildPlayerTranslation(playernum);
-
-			// [RH] set color translations for player sprites
-			mobj->Translation = TRANSLATION(TRANSLATION_Players, playernum);
-		} else {
-			int team;
-			userinfo_t *info = &players[playernum].userinfo;
-			if (teamplay && TeamLibrary.IsValidTeam((team = info->GetTeam())) && !Teams[team].GetAllowCustomPlayerColor()) {
-				int translation = TRANSLATION(TRANSLATION_LevelScripted, (Teams[team].GetPlayerTranslation()-1) );
-				mobj->Translation = translation;
-			}
-		}
 	}
 
 	mobj->angle = spawn_angle;

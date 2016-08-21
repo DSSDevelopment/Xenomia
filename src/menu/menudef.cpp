@@ -644,6 +644,11 @@ static void ParseLayoutMenuBody(FScanner &sc, FLayoutMenuDescriptor *desc)
 				ParseLayoutMenuBody(sc, desc);
 			}
 		}
+		else if (sc.Compare("HoldKey"))
+		{
+			sc.MustGetNumber();
+			desc->holdScancode = sc.Number;
+		}
 		else if (sc.Compare("Class"))
 		{
 			sc.MustGetString();
@@ -1196,6 +1201,7 @@ static void ParseLayoutMenu(FScanner &sc)
 	desc->mWLeft = 0;
 	desc->mWRight = 0;
 	desc->mCenter = false;
+	desc->holdScancode = -1;
 
 	ParseLayoutMenuBody(sc, desc);
 	bool scratch = ReplaceMenu(sc, desc);

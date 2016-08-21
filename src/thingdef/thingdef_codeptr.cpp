@@ -4826,6 +4826,22 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedTerminate)
 }
 
 
+
+static bool DoCheckSpecies(AActor *mo, FName filterSpecies, bool exclude)
+{
+	FName actorSpecies = mo->GetSpecies();
+	if (filterSpecies == NAME_None) return true;
+	return exclude ? (actorSpecies != filterSpecies) : (actorSpecies == filterSpecies);
+}
+
+static bool DoCheckClass(AActor *mo, const PClass *filterClass, bool exclude)
+{
+	const PClass *actorClass = mo->GetClass();
+	if (filterClass == NULL) return true;
+	return exclude ? (actorClass != filterClass) : (actorClass == filterClass);
+}
+
+
 //==========================================================================
 //
 // A_RadiusGive
@@ -4835,6 +4851,43 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, ACS_NamedTerminate)
 // in range.
 //
 //==========================================================================
+
+enum RadiusGiveFlags
+{
+	RGF_GIVESELF = 1 << 0,
+	RGF_PLAYERS = 1 << 1,
+	RGF_MONSTERS = 1 << 2,
+	RGF_OBJECTS = 1 << 3,
+	RGF_VOODOO = 1 << 4,
+	RGF_CORPSES = 1 << 5,
+	RGF_NOTARGET = 1 << 6,
+	RGF_NOTRACER = 1 << 7,
+	RGF_NOMASTER = 1 << 8,
+	RGF_CUBE = 1 << 9,
+	RGF_NOSIGHT = 1 << 10,
+	RGF_MISSILES = 1 << 11,
+	RGF_INCLUSIVE = 1 << 12,
+	RGF_ITEMS = 1 << 13,
+	RGF_KILLED = 1 << 14,
+	RGF_EXCLASS = 1 << 15,
+	RGF_EITHER = 1 << 16,
+	RGF_ALLIES = 1 << 17,
+	RGF_MINIONS = 1 << 18,
+	RGF_DECORATIONS = 1 << 19,
+	RGF_ENEMIES = 1 << 20,
+
+	RGF_MASK =	/*2111*/
+	RGF_GIVESELF |
+	RGF_PLAYERS |
+	RGF_MONSTERS |
+	RGF_OBJECTS |
+	RGF_VOODOO |
+	RGF_CORPSES |
+	RGF_KILLED |
+	RGF_MISSILES |
+	RGF_ITEMS,
+};
+/*
 enum RadiusGiveFlags
 {
 	RGF_GIVESELF	=   1 << 0,
@@ -4850,15 +4903,19 @@ enum RadiusGiveFlags
 	RGF_CUBE		=	1 << 9,
 	RGF_NOSIGHT		=	1 << 10,
 	RGF_MISSILES	=	1 << 11,
+	RGF_ALLIES		=	1 << 12,
+	RGF_MINIONS		=	1 << 13
 };
+*/
 
 DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 {
-	ACTION_PARAM_START(7);
+	ACTION_PARAM_START(5);
 	ACTION_PARAM_CLASS(item, 0);
 	ACTION_PARAM_FIXED(distance, 1);
 	ACTION_PARAM_INT(flags, 2);
 	ACTION_PARAM_INT(amount, 3);
+	ACTION_PARAM_CLASS(className, 4);
 
 	// We need a valid item, valid targets, and a valid range
 	if (item == NULL || (flags & RGF_MASK) == 0 || distance <= 0)
@@ -4900,10 +4957,21 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 				continue;
 			}
 		}
-		else if (thing->health <= 0 || thing->flags6 & MF6_KILLED)
+		else if ((thing->health <= 0 || thing->flags6 & MF6_KILLED) && !(flags & RGF_DECORATIONS || flags & RGF_OBJECTS))
 		{
 			continue;
 		}
+
+
+		//[DS] from [MC] Check for a species, and the related exfilter flag.
+		bool classnamepass = DoCheckClass(thing, className, !!(flags & RGF_EXCLASS));
+
+		if (!classnamepass)
+		{
+			if (thing != self) //Don't let species filter obstruct RGF_GIVESELF.
+				continue;
+		}
+
 		// Players, monsters, and other shootable objects
 		if (thing->player)
 		{
@@ -4915,12 +4983,101 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 			{
 				continue;
 			}
+			if (flags & RGF_ALLIES)
+			{
+				if (self->player)
+				{
+					int selfPlayer = int(self->player - players);
+					int thingPlayer = int(thing->player - players);
+					if (players[selfPlayer].userinfo.GetTeam() != players[thingPlayer].userinfo.GetTeam())
+					{
+						continue;
+					}
+				}
+
+				if (self->master->player)
+				{
+					int selfPlayer = int(self->master->player - players);
+					int thingPlayer = int(thing->player - players);
+					if (players[selfPlayer].userinfo.GetTeam() != players[thingPlayer].userinfo.GetTeam())
+					{
+						continue;
+					}
+				}
+			}
+			else if (flags & RGF_ENEMIES) {
+				if (self->player)
+				{
+					int selfPlayer = int(self->player - players);
+					int thingPlayer = int(thing->player - players);
+					if (players[selfPlayer].userinfo.GetTeam() == players[thingPlayer].userinfo.GetTeam())
+					{
+						continue;
+					}
+				}
+
+				if (self->master->player)
+				{
+					int selfPlayer = int(self->master->player - players);
+					int thingPlayer = int(thing->player - players);
+					if (players[selfPlayer].userinfo.GetTeam() == players[thingPlayer].userinfo.GetTeam())
+					{
+						continue;
+					}
+				}
+			}
+
+			if (flags & RGF_MINIONS)
+			{
+				continue;
+			}
+			
+				//(thing->master != NULL && thing->master->player)
+				//players[self->player - players].userInfo.GetTeam();
+				//players[thing->master->player - players].userInfo.GetTeam();
+				
 		}
 		else if (thing->flags3 & MF3_ISMONSTER)
 		{
-			if (!(flags & RGF_MONSTERS))
+			if (!(flags & RGF_MONSTERS) )
 			{
 				continue;
+			}
+			if (flags & RGF_MINIONS) 
+			{
+				if (self->player)
+				{
+					if (thing->master == NULL || thing->master != self)
+					{
+						continue;
+					}
+				}
+				else 
+				{
+					if (self->master == NULL || (self->master != thing->master))
+					{
+						continue;
+					}
+				}
+				
+			}
+			else if (flags & RGF_ENEMIES)
+			{
+				if (self->player)
+				{
+					if (thing->master == NULL || thing->master == self)
+					{
+						continue;
+					}
+				}
+				else
+				{
+					if (self->master == NULL || (self->master == thing->master))
+					{
+						continue;
+					}
+				}
+
 			}
 		}
 		else if (thing->flags & MF_SHOOTABLE || thing->flags6 & MF6_VULNERABLE)
@@ -4937,9 +5094,11 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_RadiusGive)
 				continue;
 			}
 		}
+	
 		else
 		{
-			continue;
+			if (!(flags & RGF_DECORATIONS))
+				continue;
 		}
 
 		if (flags & RGF_CUBE)
@@ -5063,10 +5222,12 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_SetSpeed)
 	ref->Speed = speed;
 }
 
+/*
 static bool DoCheckSpecies(AActor *mo, FName species, bool exclude)
 {
 	return (!(species) || mo->Species == NAME_None || (species && ((exclude) ? (mo->Species != species) : (mo->Species == species))));
 }
+*/
 
 static bool DoCheckFilter(AActor *mo, const PClass *filter, bool exclude)
 {
@@ -5815,6 +5976,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 				if (thing->master != NULL && thing->master->player)
 				{
 					totals[int(thing->master->player - players)] += thing->CaptureWeight;
+
 				}
 			}
 		}

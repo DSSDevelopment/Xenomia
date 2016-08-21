@@ -99,6 +99,7 @@ class FLayoutMenuItem;
 struct FLayoutMenuDescriptor : public FMenuDescriptor
 {
 	TDeletingArray<FLayoutMenuItem *> mItems;
+	int holdScancode;
 	int mSelectedItem;
 	int mSelectOfsX;
 	int mSelectOfsY;
@@ -543,6 +544,7 @@ public:
 	DLayoutMenu(DMenu *parent = NULL, FLayoutMenuDescriptor *desc = NULL);
 	virtual void Init(DMenu *parent = NULL, FLayoutMenuDescriptor *desc = NULL);
 	FLayoutMenuItem *GetItem(FName name);
+	int mHoldScancode;
 	bool Responder(event_t *ev);
 	bool MenuEvent(int mkey, bool fromcontroller);
 	bool MouseEvent(int type, int x, int y);

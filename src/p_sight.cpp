@@ -571,7 +571,7 @@ bool SightCheck::P_SightPathTraverse (fixed_t x1, fixed_t y1, fixed_t x2, fixed_
 	mapx = xt1;
 	mapy = yt1;
 
-	for (count = 0 ; count < 100 ; count++)
+	for (count = 0 ; count < 1000 ; count++)
 	{
 		if (!P_SightBlockLinesIterator (mapx, mapy))
 		{

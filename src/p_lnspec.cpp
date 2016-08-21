@@ -1563,6 +1563,7 @@ FUNC(LS_Thing_SetGoal)
 	AActor *goal = goaliterator.Next ();
 	bool ok = false;
 
+
 	while ( (self = selfiterator.Next ()) )
 	{
 		ok = true;

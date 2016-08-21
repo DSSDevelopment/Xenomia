@@ -38,6 +38,9 @@
 #define USE_WINDOWS_DWORD
 #endif
 
+#include <memory>
+#include <chrono>
+
 #include "except.h"
 #include "doomstat.h"
 #include "templates.h"
@@ -267,8 +270,8 @@ public:
     OpenALSoundStream(OpenALSoundRenderer *renderer)
       : Renderer(renderer), Source(0), Playing(false), Looping(false), Volume(1.0f), Reader(NULL), Decoder(NULL)
     {
-        Renderer->Streams.Push(this);
         memset(Buffers, 0, sizeof(Buffers));
+		Renderer->Streams.Push(this);
     }
 
     virtual ~OpenALSoundStream()
@@ -332,6 +335,7 @@ public:
         if(!Playing)
             return;
 
+		//std::unique_lock<std::mutex> lock(Renderer->StreamLock);
         alSourceStop(Source);
         alSourcei(Source, AL_BUFFER, 0);
         getALError();
@@ -930,7 +934,7 @@ void OpenALSoundRenderer::SetSfxVolume(float volume)
             ALuint source = GET_PTRID(schan->SysChannel);
             volume = SfxVolume;
 
-            alDeferUpdatesSOFT();
+            //[DS]alDeferUpdatesSOFT();
             alSourcef(source, AL_MAX_GAIN, volume);
             alSourcef(source, AL_GAIN, volume * schan->Volume);
         }
@@ -1432,7 +1436,7 @@ void OpenALSoundRenderer::ChannelVolume(FISoundChannel *chan, float volume)
     if(chan == NULL || chan->SysChannel == NULL)
         return;
 
-    alDeferUpdatesSOFT();
+    //[DS]alDeferUpdatesSOFT();
 
     ALuint source = GET_PTRID(chan->SysChannel);
     alSourcef(source, AL_GAIN, SfxVolume * volume);
@@ -1558,7 +1562,7 @@ void OpenALSoundRenderer::UpdateSoundParams3D(SoundListener *listener, FISoundCh
     if(chan == NULL || chan->SysChannel == NULL)
         return;
 
-    alDeferUpdatesSOFT();
+    //[DS]alDeferUpdatesSOFT();
 
     FVector3 dir = pos - listener->position;
     chan->DistanceSqr = (float)dir.LengthSquared();
@@ -1597,7 +1601,7 @@ void OpenALSoundRenderer::UpdateListener(SoundListener *listener)
     if(!listener->valid)
         return;
 
-    alDeferUpdatesSOFT();
+    //[DS]alDeferUpdatesSOFT();
 
     float angle = listener->angle;
     ALfloat orient[6];
