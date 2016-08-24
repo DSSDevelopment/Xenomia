@@ -986,7 +986,7 @@ bool AActor::IsVisibleToPlayer() const
 	
 	// [FDARI] Passed all checks but the filter
 	
-	if(VisibleFilter)
+	/*if(VisibleFilter)
 	{
 		// FDARI had a nice setup for this that involved a lot of extra safety precautions,
 		// but we really don't give a shit here. Really, it isn't mutated at all down the
@@ -998,6 +998,13 @@ bool AActor::IsVisibleToPlayer() const
 		}
 		
 		return !!(pPlayer->mo->flags7 & MF7_FILTERHIDES);
+	}
+	*/
+
+	if (VisibleFilter > 0)
+	{
+		bool visible = AAPTR_FILTER(const_cast<AActor *>(this), pPlayer->mo, VisibleFilter);
+		return (flags7 & MF7_FILTERHIDES) ? !visible : visible;
 	}
 
 	// [BB] Passed all checks.

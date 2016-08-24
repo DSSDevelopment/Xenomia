@@ -1136,7 +1136,8 @@ bool P_IsVisible(AActor *lookee, AActor *other, INTBOOL allaround, FLookExParams
 	}
 	else
 	{
-		mindist = maxdist = 0;
+		mindist = 0;
+		maxdist = 1280 * FRACUNIT;
 		fov = allaround ? 0 : ANGLE_180;
 	}
 
@@ -1159,6 +1160,12 @@ bool P_IsVisible(AActor *lookee, AActor *other, INTBOOL allaround, FLookExParams
 			if (mindist || dist > MELEERANGE)
 				return false;	// outside of fov
 		}
+	}
+	// [DS] if the enemy is within the maximum distance, go ahead and target it.
+	// Later to be controlled by a flag related to RTS unit AI
+	if (dist < maxdist)
+	{
+		return true;
 	}
 
 	// P_CheckSight is by far the most expensive operation in here so let's do it last.
@@ -1434,7 +1441,7 @@ AActor *LookForEnemiesInBlock (AActor *lookee, int index, void *extparam)
 		{
 			if (!lookee->IsFriend(link))
 			{
-				// This is somebody else's friend, so go after it
+				// This is somebody else's friend, so go after it.
 				other = link;
 			}
 			else if (link->target != NULL && !(link->target->flags & MF_FRIENDLY))
@@ -1470,9 +1477,10 @@ AActor *LookForEnemiesInBlock (AActor *lookee, int index, void *extparam)
 		}
 
 		// [KS] Hey, shouldn't there be a check for MF3_NOSIGHTCHECK here?
-
+		
 		if (other == NULL || !P_IsVisible (lookee, other, true, params))
 			continue;			// out of sight
+			
 
 
 		return other;
