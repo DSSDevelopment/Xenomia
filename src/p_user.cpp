@@ -1300,12 +1300,12 @@ void APlayerPawn::ActivateMorphWeapon ()
 	if (morphweapon == NULL || !morphweapon->IsDescendantOf (RUNTIME_CLASS(AWeapon)))
 	{ // No weapon at all while morphed!
 		player->ReadyWeapon = NULL;
-		P_SetPsprite (player, ps_weapon, NULL);
+		P_SetPsprite (player, ps_weapon, nullptr);
 	}
 	else
 	{
 		player->ReadyWeapon = static_cast<AWeapon *>(player->mo->FindInventory (morphweapon));
-		if (player->ReadyWeapon == NULL)
+		if (player->ReadyWeapon == nullptr)
 		{
 			player->ReadyWeapon = static_cast<AWeapon *>(player->mo->GiveInventoryType (morphweapon));
 			if (player->ReadyWeapon != NULL)
@@ -1319,10 +1319,10 @@ void APlayerPawn::ActivateMorphWeapon ()
 		}
 		else
 		{
-			P_SetPsprite (player, ps_weapon, NULL);
+			P_SetPsprite (player, ps_weapon, nullptr);
 		}
 	}
-	P_SetPsprite (player, ps_flash, NULL);
+	P_SetPsprite (player, ps_flash, nullptr);
 
 	player->PendingWeapon = WP_NOCHANGE;
 }

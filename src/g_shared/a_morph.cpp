@@ -111,6 +111,12 @@ bool P_MorphPlayer (player_t *activator, player_t *p, const PClass *spawntype, i
 	actor->flags |= MF_UNMORPHED;
 	actor->renderflags |= RF_INVISIBLE;
 	p->morphTics = (duration) ? duration : MORPHTICS;
+	
+	for (unsigned j = ps_user1; j <= NUMUSERPSPRITES; j++)
+	{
+		morphed->player->psprites[j].state = nullptr;
+	}
+
 
 	// [MH] Used by SBARINFO to speed up face drawing
 	p->MorphedPlayerClass = spawntype;

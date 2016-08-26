@@ -392,9 +392,9 @@ void FGLRenderer::DrawPlayerSprites(sector_t * viewsector, bool hudModelStep)
 	int oldlightmode = glset.lightmode;
 	if (glset.lightmode == 8) glset.lightmode = 2;
 	
-	for (i=0, psp=player->psprites; i<=NUMPSPRITES; i++,psp++)
+	for (i=0, psp=player->psprites; i<NUMPSPRITES; i++,psp++)
 	{
-		if (psp->state) 
+		if (psp->state != nullptr) 
 		{
 			FColormap cmc = cm;
 			if (statebright[i]) 
