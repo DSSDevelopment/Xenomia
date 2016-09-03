@@ -1430,11 +1430,11 @@ AActor *LookForEnemiesInBlock (AActor *lookee, int index, void *extparam)
 		if (link->flags2 & MF2_DORMANT)
 			continue;			// don't target dormant things
 
-		if (!(link->flags3 & MF3_ISMONSTER))
-			continue;			// don't target it if it isn't a monster (could be a barrel)
-
 		if (link->flags7 & MF7_NEVERTARGET)
 			continue;
+
+		if (!(link->flags3 & MF3_ISMONSTER) && !(link->player && lookee->FriendPlayer && link->player != &players[lookee->FriendPlayer - 1]) )
+			continue; // don't target it if it isn't a monster or enemy player (could be a barrel)
 
 		other = NULL;
 		if (link->flags & MF_FRIENDLY)
