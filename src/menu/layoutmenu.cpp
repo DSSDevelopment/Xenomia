@@ -585,10 +585,14 @@ int FLayoutMenuItemPatch::GetWidth()
 //
 //=============================================================================
 
-FLayoutMenuItemGlobalPatch::FLayoutMenuItemGlobalPatch(int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalVar, int comparator, int param)
+FLayoutMenuItemGlobalPatch::FLayoutMenuItemGlobalPatch(int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalVar, int comparator, int param, int lockGlobal, int lowerIndex)
 	: FLayoutMenuItemPatch(x, y, width, height, hotkey, enabledPatch, child, param)
 {
+	gLockGlobal = lockGlobal;
+	lowerIdx = lowerIndex;
+	idx = param;
 	enabled = false;
+	locked = false;
 	mTextureDisabled = disabledPatch;
 	global = globalVar;
 	gComparator = comparator;
@@ -598,16 +602,27 @@ void FLayoutMenuItemGlobalPatch::Ticker()
 {
 	if (global != NULL && global < 64) {
 		int x = 0;
-		idx = consoleplayer;
+		int y = 0;
+		//int player = consoleplayer;
+		int index = (consoleplayer * 24) + idx;
 		//Use the array index; assume the global is an array.
-		x = ACS_GlobalArrays[global][idx];
+		x = ACS_GlobalArrays[global][index];
 		enabled = x >= gComparator;
+
+		if (gLockGlobal > 0 && gLockGlobal < 64)
+		{
+			// int index2 = consoleplayer + lowerIdx;
+			locked = ACS_GlobalArrays[gLockGlobal][consoleplayer] < lowerIdx;
+		}
 	}
 }
 
 void FLayoutMenuItemGlobalPatch::Drawer(bool selected)
 {
-	if (enabled) {
+	if (locked) {
+		return;
+	}
+	else if (enabled) {
 		screen->DrawTexture(TexMan(mTexture), mXpos + mWidth/2, mYpos + mHeight, DTA_Clean, true, TAG_DONE);
 	}
 	else {

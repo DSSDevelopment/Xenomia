@@ -943,10 +943,24 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 				sc.MustGetNumber();
 				param = sc.Number;
 			}
+
+			int lockGlobal = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				lockGlobal = sc.Number;
+			}
+
+			int lowerIndex = 0;
+			if (sc.CheckString(","))
+			{
+				sc.MustGetNumber();
+				lowerIndex = sc.Number;
+			}
 			
 			int width = TexMan[tex]->GetScaledWidth();
 			int height = TexMan[tex]->GetScaledHeight();
-			FLayoutMenuItem *it = new FLayoutMenuItemGlobalPatch(desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param);
+			FLayoutMenuItem *it = new FLayoutMenuItemGlobalPatch(desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param, lockGlobal, lowerIndex);
 			desc->mItems.Push(it);
 			//if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 		}

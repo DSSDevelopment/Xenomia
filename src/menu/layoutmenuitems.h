@@ -243,11 +243,15 @@ class FLayoutMenuItemGlobalPatch : public FLayoutMenuItemPatch
 	int global;		// The index of an ACS Global Variable.
 	int idx;		// The index of the array within that global (optional).
 	int gComparator; // The value of the ACS Global has to be equal to or greater than this value for the item to be enabled.
+	//int idx; // Which player-offset index is used for the comparison. If none is provided, it will be zero.
+	int gLockGlobal;
+	int lowerIdx; // The value of the ACS Global has to be greater that this value for the item to be unlocked, or shown at all.
 	FTextureID mTextureDisabled;
 protected:
 	bool enabled;
+	bool locked;
 public:
-	FLayoutMenuItemGlobalPatch(int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalVar, int comparator = 1, int param = 0);
+	FLayoutMenuItemGlobalPatch(int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalVar, int comparator = 1, int param = 0, int lockGlobal = 0, int lowerIndex = 0);
 	void Drawer(bool selected);
 	void Ticker();
 	bool Selectable();
