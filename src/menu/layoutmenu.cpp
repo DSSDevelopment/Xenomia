@@ -659,6 +659,17 @@ bool FLayoutMenuItemGlobalCommandPatch::CheckCoordinate(int x, int y)
 	return enabled && y >= mYpos && y < mYpos + mHeight && x >= mXpos && x < mXpos + mWidth;	// added x check.
 }
 
+void FLayoutMenuItemGlobalSubmenuPatch::Ticker()
+{
+	if (global != NULL && global < 64) {
+		int x = 0;
+		int player = consoleplayer;
+		//Use the array index; assume the global is an array.
+		x = ACS_GlobalArrays[global][player];
+		enabled = x >= gComparator;
+	}
+}
+
 /*FLayoutMenuItemGlobalSubmenuPatch::FLayoutMenuItemGlobalSubmenuPatch(const char *menu, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator, int param)
 	: FLayoutMenuItemGlobalPatch(x, y, width, height, hotkey, enabledPatch, disabledPatch, child, globalvar, comparator, param)
 {

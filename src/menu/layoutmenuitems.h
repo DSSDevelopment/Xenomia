@@ -262,9 +262,14 @@ public:
 class FLayoutMenuItemGlobalSubmenuPatch : public FLayoutMenuItemGlobalPatch
 {
 public:
+	int global;
+	int gComparator;
+	void Ticker();
 	FLayoutMenuItemGlobalSubmenuPatch(const char *menu, int x, int y, int width, int height, int hotkey, FTextureID enabledPatch, FTextureID disabledPatch, FName child, int globalvar, int comparator = 1, int param = 0)
 		: FLayoutMenuItemGlobalPatch(x, y, width, height, hotkey, enabledPatch, disabledPatch, child, globalvar, comparator, param)
 	{
+		global = globalvar;
+		gComparator = comparator;
 		mAction = menu;
 	}
 

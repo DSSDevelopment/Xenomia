@@ -977,10 +977,12 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FTextureID disabledTex = TexMan.CheckForTexture(sc.String, FTexture::TEX_MiscPatch);
+
+			/*
 			sc.MustGetStringName(",");
 			sc.MustGetString();
 			FName action = sc.String;
-
+			*/
 
 			int comparator = 1;
 			if (sc.CheckString(","))
@@ -997,7 +999,7 @@ if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 
 			int width = TexMan[tex]->GetScaledWidth();
 			int height = TexMan[tex]->GetScaledHeight();
-			FLayoutMenuItem *it = new FLayoutMenuItemGlobalSubmenuPatch(menu, desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, action, global, comparator, param);
+			FLayoutMenuItem *it = new FLayoutMenuItemGlobalSubmenuPatch(menu, desc->mXpos, desc->mYpos, width, height, 0, tex, disabledTex, " ", global, comparator, param);
 			desc->mItems.Push(it);
 			//if (desc->mSelectedItem == -1) desc->mSelectedItem = desc->mItems.Size() - 1;
 		}

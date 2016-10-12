@@ -48,9 +48,12 @@ extern gamestate_t wipegamestate;
 
 bool P_CheckTickerPaused ()
 {
+	// [DS] temporary change to never pause during a game, even in singleplayer
+	return false;
 	// pause if in menu or console and at least one tic has been run
-	if ( !netgame
-		 && gamestate != GS_TITLELEVEL
+	if (!netgame
+		 && 
+		gamestate != GS_TITLELEVEL
 		 && ((menuactive != MENU_Off && menuactive != MENU_OnNoPause) ||
 			 ConsoleState == c_down || ConsoleState == c_falling)
 		 && !demoplayback
