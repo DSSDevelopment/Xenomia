@@ -237,7 +237,7 @@ void DMenu::SetCapture()
 	if (!mMouseCapture)
 	{
 		mMouseCapture = true;
-		I_SetMouseCapture();
+		//I_SetMouseCapture();
 	}
 }
 
@@ -313,12 +313,11 @@ void M_StartControlPanel (bool makeSound)
 	// Pause sound effects before we play the menu switch sound.
 	// That way, it won't be paused.
 	P_CheckTickerPaused ();
-
 	if (makeSound)
 	{
 		S_Sound (CHAN_VOICE | CHAN_UI, "menu/activate", snd_menuvolume, ATTN_NONE);
 	}
-	BackbuttonTime = 0;
+    BackbuttonTime = 0;
 	BackbuttonAlpha = 0;
 }
 
@@ -331,9 +330,9 @@ void M_StartControlPanel (bool makeSound)
 void M_ActivateMenu(DMenu *menu)
 {
 	if (menuactive == MENU_Off) menuactive = MENU_On;
-	if (DMenu::CurrentMenu != NULL) DMenu::CurrentMenu->ReleaseCapture();
+    if (DMenu::CurrentMenu != NULL) DMenu::CurrentMenu->ReleaseCapture();
 	DMenu::CurrentMenu = menu;
-	GC::WriteBarrier(DMenu::CurrentMenu);
+    GC::WriteBarrier(DMenu::CurrentMenu);
 }
 
 //=============================================================================
@@ -344,7 +343,7 @@ void M_ActivateMenu(DMenu *menu)
 
 void M_SetMenu(FName menu, int param)
 {
-	// some menus need some special treatment
+    // some menus need some special treatment
 	switch (menu)
 	{
 	case NAME_Episodemenu:

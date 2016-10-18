@@ -845,6 +845,7 @@ add_executable( gloome WIN32 MACOSX_BUNDLE
 	menu/menuinput.cpp
 	menu/messagebox.cpp
 	menu/optionmenu.cpp
+    menu/layoutmenu.cpp
 	menu/playerdisplay.cpp
 	menu/playermenu.cpp
 	menu/readthis.cpp
