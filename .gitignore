@@ -42,3 +42,5 @@
 libmpg123-0.exp
 libmpg123-0.lib
 CMakeCache.txt
+libGLEW*
+libsndfile*
