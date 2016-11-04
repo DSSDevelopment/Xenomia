@@ -42,14 +42,14 @@ const char *GetVersionString();
 #define VERSIONSTR "1.8.12"
 
 // The version as seen in the Windows resource
-#define RC_FILEVERSION 1,8,12,0
-#define RC_PRODUCTVERSION 1,8,12,0
-#define RC_PRODUCTVERSION2 "1.8.12"
+#define RC_FILEVERSION 1,8,13,0
+#define RC_PRODUCTVERSION 1,8,13,0
+#define RC_PRODUCTVERSION2 "1.8.13"
 
 // Version identifier for network games.
 // Bump it every time you do a release unless you're certain you
 // didn't change anything that will affect sync.
-#define NETGAMEVERSION 233
+#define NETGAMEVERSION 234
 
 // Version stored in the ini's [LastRun] section.
 // Bump it if you made some configuration change that you want to
@@ -86,8 +86,8 @@ const char *GetVersionString();
 // More stuff that needs to be different for derivatives.
 #define GAMENAME "XENOMIA"
 #define GAMENAMELOWERCASE "xenomia"
-#define FORUM_URL "http://forum.drdteam.org"
-#define BUGS_FORUM_URL	"http://forum.drdteam.org/viewforum.php?f=24"
+#define FORUM_URL "http://forums.xenomia.com"
+#define BUGS_FORUM_URL	"http://http://forums.xenomia.com/c/bug-reports"
 
 // This is so that derivates can use the same savegame versions without worrying about engine compatibility
 #define GAMESIG GAMENAME

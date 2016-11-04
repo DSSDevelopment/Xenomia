@@ -5909,8 +5909,8 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 	double distsquared = double(distance) * double(distance);
 
 	//The array of totals.
-	int totals[8];
-	for (int i = 0; i < 8; i++)
+	int totals[9];
+	for (int i = 0; i < 9; i++)
 	{
 		totals[i] = 0;
 	}
@@ -5977,6 +5977,9 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 				{
 					totals[int(thing->master->player - players)] += thing->CaptureWeight;
 
+				} 
+				else if (thing->flags7 & MF7_ISCREEP) { //Creeps capture according to their own rules.
+					totals[8] += thing->CaptureWeight;
 				}
 			}
 		}
@@ -5990,13 +5993,13 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 	int largest = 0;
 	int winner = 0;
 	bool statusChanged = false;
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 9; i++)
 	{
 		int j = totals[i];
 		if (largest > 0 && j > 0)
 		{
 			//Don't let teammates prevent each other's capture in progress, but first-come, first served.
-			if ( (players[i].userinfo.GetTeam() == players[winner].userinfo.GetTeam()) )
+			if ( i < 8 && (players[i].userinfo.GetTeam() == players[winner].userinfo.GetTeam()) )
 			{
 				if (currentCaptor > -1)
 				{
@@ -6006,7 +6009,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 				break;
 			}
 			else {
-				return;
+				return; //early out: point is in contention.
 			}
 		}
 		if (j > largest)
@@ -6071,7 +6074,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 		}
 			
 	}
-	else if (owner >= 0 && owner < sizeof(players)) //Point is owned.
+	else if (owner >= 0 && owner < 9) //Point is owned.
 	{
 		if (largest <= 0) //No one is capturing the point.
 		{
@@ -6087,7 +6090,7 @@ DEFINE_ACTION_FUNCTION_PARAMS(AActor, A_CheckCapture)
 			return;
 		}
 		//Is the winner our owning player or a teammate?
-		if ( winner == owner || players[winner].userinfo.GetTeam() == players[owner].userinfo.GetTeam() )
+		if (winner == owner || ( (winner != 8 && owner != 8) && (players[winner].userinfo.GetTeam() == players[owner].userinfo.GetTeam()) ) )
 		{
 			//If yes, is the capture progress below the capture threshold (point has been decapped a bit)?
 			if (self->CaptureProgress < self->CaptureThreshold)

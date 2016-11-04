@@ -356,7 +356,8 @@ enum
 	MF7_HITTRACER		= 0x00010000,	// Same as HITTARGET, but for tracer.
 	MF7_NODECAL			= 0x00020000,	// [ZK] Forces puff to have no impact decal
 	MF7_FORCEDECAL		= 0x00040000,	// [ZK] Forces P_LineAttack to use the puff's decal, even if the player's weapon has a decal defined
-	MF7_FILTERHIDES = 0x00080000, // Show the actor to anything not covered by the filter
+	MF7_FILTERHIDES		= 0x00080000, // Show the actor to anything not covered by the filter
+	MF7_ISCREEP			= 0x00100000,
 
 
 // --- mobj.renderflags ---

@@ -6072,6 +6072,9 @@ bool AActor::IsFriend (AActor *other)
 			other->FriendPlayer == 0 ||
 			players[FriendPlayer-1].mo->IsTeammate(players[other->FriendPlayer-1].mo);
 	}
+	//[DS] support for creeps faction. They are enemies of all playerkind but allies to each other.
+	if (flags & other->flags7 & MF7_ISCREEP) return true;
+
 	return false;
 }
 
@@ -6085,6 +6088,9 @@ bool AActor::IsFriend (AActor *other)
 
 bool AActor::IsHostile (AActor *other)
 {
+	// Only one monster is a creep, so the other is a valid target for that creep.
+	if (flags7 & MF7_ISCREEP && !(other->flags7 & MF7_ISCREEP)) return true;
+
 	// Both monsters are non-friendlies so hostilities depend on infighting settings
 	if (!((flags | other->flags) & MF_FRIENDLY)) return false;
 

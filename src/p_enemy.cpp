@@ -1433,7 +1433,10 @@ AActor *LookForEnemiesInBlock (AActor *lookee, int index, void *extparam)
 		if (link->flags7 & MF7_NEVERTARGET)
 			continue;
 
-		if (!(link->flags3 & MF3_ISMONSTER) && !(link->player && lookee->FriendPlayer && link->player != &players[lookee->FriendPlayer - 1]) )
+		if (lookee->flags7 & MF7_ISCREEP && link->flags7 & MF7_ISCREEP) //Creeps don't target other creeps.
+			continue;
+
+		if (!(link->flags3 & MF3_ISMONSTER) && !((link->player && lookee->FriendPlayer && link->player != &players[lookee->FriendPlayer - 1]) || (lookee->flags7 & MF7_ISCREEP && link->player)) )
 			continue; // don't target it if it isn't a monster or enemy player (could be a barrel)
 
 		other = NULL;
@@ -1566,7 +1569,7 @@ bool P_LookForPlayers (AActor *actor, INTBOOL allaround, FLookExParams *params)
 			return false;
 		}
 	}
-	else if (actor->flags & MF_FRIENDLY)
+	else if (actor->flags & MF_FRIENDLY || actor->flags7 & MF7_ISCREEP)
 	{
 		bool result = P_LookForEnemies (actor, allaround, params);
 
@@ -2296,7 +2299,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 		}
 		if (actor->target == NULL)
 		{
-			if (actor->flags & MF_FRIENDLY)
+			if (actor->flags & MF_FRIENDLY || actor->flags7 & MF7_ISCREEP)
 			{
 				//CALL_ACTION(A_Look, actor);
 				if (actor->target == NULL)
