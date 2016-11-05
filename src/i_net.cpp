@@ -849,7 +849,8 @@ void JoinGame (int i)
 		(Args->GetArg(i+1)[0] == '+'))
 		I_FatalError ("You need to specify the host machine's address");
 
-	StartNetwork (true);
+	//[DS] - so our relay works
+	StartNetwork (false);
 
 	// Host is always node 1
 	BuildAddress (&sendaddress[1], Args->GetArg(i+1));
