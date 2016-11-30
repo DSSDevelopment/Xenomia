@@ -2272,7 +2272,7 @@ void A_DoChase (AActor *actor, bool fastchase, FState *meleestate, FState *missi
 			}
 			player = &players[i];
 		}
-		if (player->attacker && player->attacker->health > 0 && player->attacker->flags & MF_SHOOTABLE && pr_newchasedir() < 80)
+		if (player->attacker && player->attacker->health > 0 && player->attacker->flags & MF_SHOOTABLE && pr_newchasedir() < 80 && !(player->attacker->flags7 & MF7_NEVERTARGET))
 		{
 			if (!(player->attacker->flags & MF_FRIENDLY) ||
 				(deathmatch && actor->FriendPlayer != 0 && player->attacker->FriendPlayer != 0 &&

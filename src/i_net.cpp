@@ -225,7 +225,7 @@ void PacketSend (void)
 	}
 	if (c == Z_OK && size < (uLong)doomcom.datalength)
 	{
-//		Printf("send %lu/%d\n", size, doomcom.datalength);
+		//Printf("send %lu/%d\n", size, doomcom.datalength);
 		c = sendto(mysocket, (char *)TransmitBuffer, size,
 			0, (sockaddr *)&sendaddress[doomcom.remotenode],
 			sizeof(sendaddress[doomcom.remotenode]));
@@ -302,7 +302,7 @@ void PacketGet (void)
 		{
 			uLongf msgsize = MAX_MSGLEN - 1;
 			int err = uncompress(doomcom.data + 1, &msgsize, TransmitBuffer + 1, c - 1);
-//			Printf("recv %d/%lu\n", c, msgsize + 1);
+			//Printf("recv %d/%lu\n", c, msgsize + 1);
 			if (err != Z_OK)
 			{
 				Printf("Net decompression failed (zlib error %s)\n", M_ZLibError(err).GetChars());
@@ -314,7 +314,7 @@ void PacketGet (void)
 		}
 		else
 		{
-//			Printf("recv %d\n", c);
+			//Printf("recv %d\n", c);
 			memcpy(doomcom.data + 1, TransmitBuffer + 1, c - 1);
 		}
 	}
